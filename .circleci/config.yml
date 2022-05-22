@@ -1,0 +1,103 @@
+version: 2.1
+
+executors:
+  rust-env:
+    docker:
+      - image: cimg/rust:1.61
+
+commands:
+  cargo-build:
+    parameters:
+      rust-version:
+        default: "1.61.0"
+        type: string
+    steps:
+      - run:
+          name: Update Rust and check build <<parameters.rust-version>>
+          command: |
+            rustup update <<parameters.rust-version>>
+            cargo +<<parameters.rust-version>> check --all-features
+
+jobs:
+  build:
+    executor: rust-env
+    steps:
+      - checkout
+      - run: cargo --version
+      - cargo-build
+      - cargo-build:
+          rust-version: "nightly"
+      - cargo-build:
+          rust-version: "stable"
+      - cargo-build:
+          rust-version: "1.56.0"
+
+  basic-test:
+    executor: rust-env
+    steps:
+      - checkout
+      - run: cargo --version
+      - run:
+          name: Check formatting for code
+          command: |
+            rustfmt --version
+            cargo fmt --all -- --check
+      - run:
+          name: Check idiomatic code use with Clippy
+          command: "cargo clippy --all --tests --all-features -- -D warnings"
+      - run:
+          name: Test crate with no features specified
+          command: "cargo test"
+
+  all-features-flag-test:
+    executor: rust-env
+    steps:
+      - checkout
+      - run: cargo --version
+      - run:
+          name: Test all features of the crate
+          command: "cargo test --all-features"
+
+  feature-test:
+    parameters:
+      feature:
+        type: string
+    executor: rust-env
+    steps:
+      - checkout
+      - run: cargo --version
+      - run:
+          name: Test <<parameters.feature>> features of the crate
+          command: "cargo test --features <<parameters.feature>>"
+
+  docs:
+    executor: rust-env
+    environment:
+      RUSTDOCFLAGS: --cfg docsrs -Dwarnings
+    steps:
+      - checkout
+      - run:
+          name: Test generation of all of the documentation for the crate
+          command: |
+            rustup update nightly
+            cargo +nightly doc --lib --no-deps --all-features --document-private-items
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  build-test-docs:
+    jobs:
+      - build
+      - basic-test
+      # - feature-test:
+      #     matrix:
+      #       parameters:
+      #         feature:
+      #           [
+      #             all,
+      #           ]
+      #     requires:
+      #       - basic-test
+      # - all-features-flag-test:
+      #     requires:
+      #       - feature-test
+      - docs

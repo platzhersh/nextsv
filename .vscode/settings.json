@@ -1,4 +1,7 @@
 {
+    "cSpell.words": [
+        "nextsv"
+    ],
     "conventionalCommits.scopes": [
         "CI"
     ]

@@ -3,6 +3,7 @@
         "nextsv"
     ],
     "conventionalCommits.scopes": [
-        "CI"
+        "CI",
+        "Semantic Version"
     ]
 }

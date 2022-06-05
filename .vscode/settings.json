@@ -1,9 +1,11 @@
 {
     "cSpell.words": [
-        "nextsv"
+        "nextsv",
+        "workdir"
     ],
     "conventionalCommits.scopes": [
         "CI",
-        "Semantic Version"
+        "Semantic Version",
+        "Error Management"
     ]
 }

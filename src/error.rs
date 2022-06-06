@@ -14,4 +14,8 @@ pub enum Error {
     NotEnoughComponents(usize),
     #[error("Version must be a number but found {0}")]
     MustBeNumber(String),
+    #[error("No valid version tag found in the repository")]
+    NoVersionTag,
+    #[error("0:?")]
+    Git2(#[from] git2::Error),
 }

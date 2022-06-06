@@ -1,22 +1,12 @@
-//! Semantic Versioning Management
+//! Semantic Versioning Struct
 //!
-//! Calculates the next semantic version number based on the current version
-//! number and the conventional commits that have been made since the
-//! last version has been released.
-//!
-//! ```rust
-//!
-//!     let current_version = Semantic::current();
-//!     let new_version = current_version.bump();
-//!
-//! ```
+//! ...
 
 use std::fmt;
 
-mod error;
-use error::Error;
+use crate::Error;
 /// The Semantic data structure represents a semantic version number.
-#[derive(Debug, Default, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(Debug, Default, PartialEq, PartialOrd, Eq, Ord, Clone, Copy)]
 pub struct Semantic {
     major: usize,
     minor: usize,
@@ -89,8 +79,7 @@ impl Semantic {
 
 #[cfg(test)]
 mod tests {
-    use crate::nextsv::*;
-    use claim::*;
+    use super::*;
 
     #[test]
     fn display_semantic_version_number() {
@@ -128,7 +117,7 @@ mod tests {
         let tag = "v0.3.90";
         let semantic = Semantic::parse(tag);
 
-        assert_ok!(&semantic);
+        claim::assert_ok!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -141,7 +130,7 @@ mod tests {
         let tag = "0.3.90";
         let semantic = Semantic::parse(tag);
 
-        assert_err!(&semantic);
+        claim::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -157,7 +146,7 @@ mod tests {
         let tag = "v0.3.90.8";
         let semantic = Semantic::parse(tag);
 
-        assert_err!(&semantic);
+        claim::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -173,7 +162,7 @@ mod tests {
         let tag = "v0.3";
         let semantic = Semantic::parse(tag);
 
-        assert_err!(&semantic);
+        claim::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -189,7 +178,7 @@ mod tests {
         let tag = "v0.3.90-8";
         let semantic = Semantic::parse(tag);
 
-        assert_err!(&semantic);
+        claim::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),

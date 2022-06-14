@@ -1,6 +1,8 @@
 {
     "cSpell.words": [
         "nextsv",
+        "reflog",
+        "revwalk",
         "workdir"
     ],
     "conventionalCommits.scopes": [

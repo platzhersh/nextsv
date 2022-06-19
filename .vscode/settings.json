@@ -8,6 +8,8 @@
     "conventionalCommits.scopes": [
         "CI",
         "Semantic Version",
-        "Error Management"
+        "Error Management",
+        "conventional",
+        "version_tag"
     ]
 }

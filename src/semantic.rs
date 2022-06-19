@@ -1,11 +1,16 @@
 //! Semantic Versioning Struct
 //!
-//! ...
+//! Holds a semantic version number as defined by
+//! the [Semantic Version Specification v 2.0.0](https://semver.org/spec/v2.0.0.html)
+//!
 
 use std::fmt;
 
 use crate::Error;
 /// The Semantic data structure represents a semantic version number.
+///
+/// TODO: Implement support for pre-release and build
+///
 #[derive(Debug, Default, PartialEq, PartialOrd, Eq, Ord, Clone, Copy)]
 pub struct Semantic {
     major: usize,
@@ -15,7 +20,7 @@ pub struct Semantic {
 
 impl fmt::Display for Semantic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
+        write!(f, "v{}.{}.{}", self.major, self.minor, self.patch)
     }
 }
 

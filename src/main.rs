@@ -23,5 +23,6 @@ fn main() -> Result<(), Error> {
         println!("No breaking change.");
     }
 
+    println!("Next Version: {}", latest_version.next());
     Ok(())
 }

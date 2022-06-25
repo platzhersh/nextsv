@@ -165,4 +165,37 @@ impl VersionTag {
 
         Ok(self)
     }
+
+    pub fn next(&self) -> Semantic {
+        // clone the current version to mutate for the next version
+        let mut next_version = self.name.clone();
+
+        // check the conventional commits. No conventional commits; no change.
+        if let Some(conventional) = self.conventional.clone() {
+            let other_commits = conventional.docs_commits()
+                + conventional.chore_commits()
+                + conventional.refactor_commits();
+
+            // Breaking change found in commits
+            if conventional.breaking() {
+                next_version.breaking_increment();
+            }
+
+            if next_version.major() == 0 {
+                if conventional.feat_commits() > 0 {
+                    next_version.increment_minor();
+                } else {
+                    next_version.increment_patch();
+                }
+            } else if conventional.feat_commits() > 0 {
+                next_version.increment_major();
+            } else if conventional.fix_commits() > 0 {
+                next_version.increment_minor();
+            } else if other_commits > 0 {
+                next_version.increment_patch();
+            }
+        }
+
+        next_version
+    }
 }

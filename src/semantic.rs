@@ -99,23 +99,39 @@ impl Semantic {
             numbers[2],
         ))
     }
+
+    /// Increment the version based on a breaking change
+    /// When the major number is 0 increment the minor
+    /// number else increment the major number
+    pub fn breaking_increment(&mut self) -> &mut Self {
+        if self.major == 0 {
+            self.minor += 1
+        } else {
+            self.major += 1
+        }
+        self
+    }
+
     /// Increment the patch component of the version number by 1
-    fn increment_patch(self) -> Self {
-        let mut patch = self.patch;
-        patch += 1;
-        Semantic::new(self.version_prefix, self.major, self.minor, patch)
+    pub fn increment_patch(&mut self) -> &mut Self {
+        self.patch += 1;
+        self
     }
+
     /// Increment the minor component of the version number by 1
-    fn increment_minor(self) -> Self {
-        let mut minor = self.minor;
-        minor += 1;
-        Semantic::new(self.version_prefix, self.major, minor, self.patch)
+    pub fn increment_minor(&mut self) -> &mut Self {
+        self.minor += 1;
+        self
     }
+
     /// Increment the major component of the version number by 1
-    fn increment_major(self) -> Self {
-        let mut major = self.major;
-        major += 1;
-        Semantic::new(self.version_prefix, major, self.minor, self.patch)
+    pub fn increment_major(&mut self) -> &mut Self {
+        self.major += 1;
+        self
+    }
+
+    pub fn major(&self) -> usize {
+        self.major
     }
 }
 
@@ -132,7 +148,7 @@ mod tests {
 
     #[test]
     fn bump_patch_version_number_by_one() {
-        let version = Semantic::default();
+        let mut version = Semantic::default();
         let updated_version = version.increment_patch();
 
         assert_eq!("0.0.1", &updated_version.to_string());
@@ -140,7 +156,7 @@ mod tests {
 
     #[test]
     fn bump_minor_version_number_by_one() {
-        let version = Semantic::default();
+        let mut version = Semantic::default();
         let updated_version = version.increment_minor();
 
         assert_eq!("0.1.0", &updated_version.to_string());
@@ -148,7 +164,7 @@ mod tests {
 
     #[test]
     fn bump_major_version_number_by_one() {
-        let version = Semantic::default();
+        let mut version = Semantic::default();
         let updated_version = version.increment_major();
 
         assert_eq!("1.0.0", &updated_version.to_string());

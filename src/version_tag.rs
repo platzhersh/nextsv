@@ -29,7 +29,7 @@ impl VersionTag {
 
     /// The  name field
     pub fn name(&self) -> Semantic {
-        self.name
+        self.name.clone()
     }
 
     /// The id field
@@ -81,10 +81,7 @@ impl VersionTag {
     /// If the conventional commits field has not been set returns 0
     pub fn refactor_commits(&self) -> u32 {
         if self.conventional.is_some() {
-            self.conventional
-                .as_ref()
-                .unwrap()
-                .refactor_commits()
+            self.conventional.as_ref().unwrap().refactor_commits()
         } else {
             0
         }
@@ -102,14 +99,14 @@ impl VersionTag {
 
     /// The latest semantic version tag (vx.y.z)
     ///
-    pub fn latest() -> Result<Self, Error> {
+    pub fn latest(version_prefix: &str) -> Result<Self, Error> {
         let repo = Repository::open(".")?;
         let mut versions = vec![];
         repo.tag_foreach(|id, name| {
             if let Ok(name) = String::from_utf8(name.to_owned()) {
                 if let Some(name) = name.strip_prefix("refs/tags/") {
                     if name.starts_with('v') {
-                        if let Ok(semantic_version) = Semantic::parse(name) {
+                        if let Ok(semantic_version) = Semantic::parse(name, version_prefix) {
                             versions.push(VersionTag::new(semantic_version, id));
                         }
                     }

@@ -6,7 +6,7 @@ fn main() -> Result<(), Error> {
 
     // What is the latest tag?
     // What are the conventional commits since that tag?
-    let latest_version = VersionTag::latest()?.commits()?;
+    let latest_version = VersionTag::latest("v")?.commits()?;
 
     println!(
         "Conventional commits by type for version: {}",

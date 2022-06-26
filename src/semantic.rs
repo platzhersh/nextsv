@@ -121,12 +121,15 @@ impl Semantic {
     /// Increment the minor component of the version number by 1
     pub fn increment_minor(&mut self) -> &mut Self {
         self.minor += 1;
+        self.patch = 0;
         self
     }
 
     /// Increment the major component of the version number by 1
     pub fn increment_major(&mut self) -> &mut Self {
         self.major += 1;
+        self.minor = 0;
+        self.patch = 0;
         self
     }
 

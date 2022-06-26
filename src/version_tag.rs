@@ -131,7 +131,7 @@ impl VersionTag {
         let mut revwalk = repo.revwalk()?;
         revwalk.set_sorting(git2::Sort::NONE)?;
         revwalk.push_head()?;
-        let glob = dbg!(format!("refs/tags/{}", self.name));
+        let glob = format!("refs/tags/{}", self.name);
         revwalk.hide_ref(&glob)?;
 
         macro_rules! filter_try {

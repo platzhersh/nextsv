@@ -35,9 +35,8 @@ fn main() -> Result<(), Error> {
         } else {
             eprintln!("No breaking change.");
         }
-        println!("Next Version: {}", latest_version.next());
-    } else {
-        println!("{}", latest_version.next());
+        eprint!("Next Version: ");
     }
+    println!("{}", latest_version.next());
     Ok(())
 }

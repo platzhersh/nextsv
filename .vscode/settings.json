@@ -11,6 +11,7 @@
         "Semantic Version",
         "Error Management",
         "conventional",
-        "version_tag"
+        "version_tag",
+        "cli"
     ]
 }

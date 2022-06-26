@@ -181,7 +181,7 @@ impl VersionTag {
             if next_version.major() == 0 {
                 if conventional.feat_commits() > 0 {
                     next_version.increment_minor();
-                } else if other_commits > 0 {
+                } else if conventional.fix_commits() > 0 || other_commits > 0 {
                     next_version.increment_patch();
                 }
             } else if conventional.feat_commits() > 0 {

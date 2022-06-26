@@ -131,6 +131,8 @@ impl VersionTag {
         let mut revwalk = repo.revwalk()?;
         revwalk.set_sorting(git2::Sort::NONE)?;
         revwalk.push_head()?;
+        let glob = dbg!(format!("refs/tags/{}", self.name));
+        revwalk.hide_ref(&glob)?;
 
         macro_rules! filter_try {
             ($e:expr) => {
@@ -153,11 +155,6 @@ impl VersionTag {
 
         for commit in revwalk {
             let commit = commit?;
-            // counter += 1;
-            // Break once we find the latest version tag
-            if commit.id() == self.id() {
-                break;
-            }
             conventional_commits.push(&commit);
         }
 
@@ -184,7 +181,7 @@ impl VersionTag {
             if next_version.major() == 0 {
                 if conventional.feat_commits() > 0 {
                     next_version.increment_minor();
-                } else {
+                } else if other_commits > 0 {
                     next_version.increment_patch();
                 }
             } else if conventional.feat_commits() > 0 {

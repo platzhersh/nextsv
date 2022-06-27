@@ -105,9 +105,12 @@ impl Semantic {
     /// number else increment the major number
     pub fn breaking_increment(&mut self) -> &mut Self {
         if self.major == 0 {
-            self.minor += 1
+            self.minor += 1;
+            self.patch = 0;
         } else {
-            self.major += 1
+            self.major += 1;
+            self.minor = 0;
+            self.patch = 0;
         }
         self
     }
@@ -131,6 +134,19 @@ impl Semantic {
         self.minor = 0;
         self.patch = 0;
         self
+    }
+
+    /// Set the first production release version
+    ///
+    pub fn first_production(&mut self) -> Result<&mut Self, Error> {
+        if self.major == 0 {
+            self.major = 1;
+            self.minor = 0;
+            self.patch = 0;
+        } else {
+            return Err(Error::MajorAlreadyUsed(self.major.to_string()));
+        }
+        Ok(self)
     }
 
     pub fn major(&self) -> usize {

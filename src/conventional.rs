@@ -79,4 +79,25 @@ impl ConventionalCommits {
     pub fn breaking(&self) -> bool {
         self.breaking
     }
+
+    /// Set the breaking flag value
+    ///
+    pub fn set_breaking(&mut self, flag: bool) -> &mut Self {
+        self.breaking = flag;
+        self
+    }
+
+    /// Set feat_commits count to one
+    ///
+    pub fn set_one_feat(&mut self) -> &mut Self {
+        self.feat_commits = 1;
+        self
+    }
+
+    /// Set feat_commits count to one
+    ///
+    pub fn set_one_fix(&mut self) -> &mut Self {
+        self.fix_commits = 1;
+        self
+    }
 }

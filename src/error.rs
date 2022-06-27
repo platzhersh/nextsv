@@ -16,6 +16,8 @@ pub enum Error {
     MustBeNumber(String),
     #[error("No valid version tag found in the repository")]
     NoVersionTag,
+    #[error("First production release already deployed. Current major version: {0}")]
+    MajorAlreadyUsed(String),
     #[error("0:?")]
     Git2(#[from] git2::Error),
 }

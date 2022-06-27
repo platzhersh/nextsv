@@ -1,29 +1,36 @@
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use nextsv_lib::Error;
 use nextsv_lib::VersionTag;
 
+#[derive(ValueEnum, Debug, Clone)]
+enum ForceOptions {
+    Major,
+    Minor,
+    Patch,
+    First,
+}
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
-struct NextsvCliArgs {
-    // #[clap(short, long, value_parser)]
-    // name: String,
-    // #[clap(short, long, value_parser, default_value_t = 1)]
-    // count: u8,
+struct Cli {
     #[clap(short, long, value_parser, default_value_t = false)]
     verbose: bool,
+    #[clap(short, long, value_enum)]
+    force: Option<ForceOptions>,
 }
 
 fn main() -> Result<(), Error> {
     // What is the latest tag?
     // What are the conventional commits since that tag?
-    let args = NextsvCliArgs::parse();
+    let args = Cli::parse();
 
-    let latest_version = VersionTag::latest("v")?.commits()?;
+    let mut latest_version = VersionTag::latest("v")?;
+
     if args.verbose {
         eprintln!("Next Version\n------------\n");
         eprintln!(
             "Conventional commits by type for version: {}",
-            latest_version.name()
+            &latest_version.name()
         );
         eprintln!("  feat:       {}", latest_version.feat_commits());
         eprintln!("  fix:        {}", latest_version.fix_commits());
@@ -37,6 +44,19 @@ fn main() -> Result<(), Error> {
         }
         eprint!("Next Version: ");
     }
-    println!("{}", latest_version.next());
+
+    let next_version = if let Some(svc) = args.force {
+        match svc {
+            ForceOptions::Major => latest_version.force_major().next(),
+            ForceOptions::Minor => latest_version.force_minor().next(),
+            ForceOptions::Patch => latest_version.force_patch().next(),
+            ForceOptions::First => latest_version.promote_first()?.name(),
+        }
+    } else {
+        latest_version.commits()?.next()
+    };
+
+    println!("{}", next_version);
+
     Ok(())
 }

@@ -124,6 +124,40 @@ impl VersionTag {
         }
     }
 
+    /// Construct conventional commits that forces Major update
+    ///
+    pub fn force_major(&mut self) -> Self {
+        let mut conventional_commits = ConventionalCommits::new();
+        conventional_commits.set_breaking(true);
+        self.conventional = Some(conventional_commits);
+        self.clone()
+    }
+
+    /// Construct conventional commits that forces Minor update
+    ///
+    pub fn force_minor(&mut self) -> Self {
+        let mut conventional_commits = ConventionalCommits::new();
+        conventional_commits.set_one_feat();
+        self.conventional = Some(conventional_commits);
+        self.clone()
+    }
+
+    /// Construct conventional commits that forces Patch update
+    ///
+    pub fn force_patch(&mut self) -> Self {
+        let mut conventional_commits = ConventionalCommits::new();
+        conventional_commits.set_one_fix();
+        self.conventional = Some(conventional_commits);
+        self.clone()
+    }
+
+    /// Promote the first production version (1.0.0)
+    ///
+    pub fn promote_first(&mut self) -> Result<Self, Error> {
+        self.name.first_production()?;
+        Ok(self.clone())
+    }
+
     /// The number of conventional commits created since the tag was created
     ///
     pub fn commits(mut self) -> Result<Self, Error> {
@@ -185,10 +219,8 @@ impl VersionTag {
                     next_version.increment_patch();
                 }
             } else if conventional.feat_commits() > 0 {
-                next_version.increment_major();
-            } else if conventional.fix_commits() > 0 {
                 next_version.increment_minor();
-            } else if other_commits > 0 {
+            } else if conventional.fix_commits() > 0 || other_commits > 0 {
                 next_version.increment_patch();
             }
         }

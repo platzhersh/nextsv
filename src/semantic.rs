@@ -7,6 +7,21 @@
 use std::fmt;
 
 use crate::Error;
+
+
+/// Levels for semantic bump
+/// 
+#[derive(Debug, Display)]
+pub enum Level {
+    patch,
+    minor,
+    major,
+    release,
+    alpha,
+    beta,
+    rc,
+}
+
 /// The Semantic data structure represents a semantic version number.
 ///
 /// TODO: Implement support for pre-release and build

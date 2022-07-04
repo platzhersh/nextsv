@@ -7,7 +7,7 @@
 //!
 //!
 
-use crate::{ConventionalCommits, Error, Semantic};
+use crate::{ConventionalCommits, Error, Level, Semantic};
 use git2::{Oid, Repository};
 
 /// Describes a tag
@@ -16,6 +16,7 @@ pub struct VersionTag {
     name: Semantic,
     id: Oid,
     conventional: Option<ConventionalCommits>,
+    bump_level: Level,
 }
 
 impl VersionTag {
@@ -24,6 +25,7 @@ impl VersionTag {
             name,
             id,
             conventional: None,
+            bump_level: None,
         }
     }
 
@@ -197,7 +199,7 @@ impl VersionTag {
         Ok(self)
     }
 
-    pub fn next(&self) -> Semantic {
+    pub fn next(&mut self) -> Semantic {
         // clone the current version to mutate for the next version
         let mut next_version = self.name.clone();
 
@@ -210,21 +212,31 @@ impl VersionTag {
             // Breaking change found in commits
             if conventional.breaking() {
                 next_version.breaking_increment();
+                self.bump_level = Some(Level::Major);
             }
 
             if next_version.major() == 0 {
                 if conventional.feat_commits() > 0 {
                     next_version.increment_minor();
+                    self.bump_level = Some(Level::Minor);
                 } else if conventional.fix_commits() > 0 || other_commits > 0 {
                     next_version.increment_patch();
+                    self.bump_level = Some(Level::Patch);
                 }
             } else if conventional.feat_commits() > 0 {
                 next_version.increment_minor();
+                self.bump_level = Some(Level::Minor);
             } else if conventional.fix_commits() > 0 || other_commits > 0 {
                 next_version.increment_patch();
+                self.bump_level = Some(Level::Patch);
             }
         }
 
         next_version
     }
+
+pub fn bump_level(&self) -> Option<Level> {
+    self.bump_level.clone()
+}
+
 }

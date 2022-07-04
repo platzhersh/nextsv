@@ -13,13 +13,13 @@ use crate::Error;
 /// 
 #[derive(Debug, Display)]
 pub enum Level {
-    patch,
-    minor,
-    major,
-    release,
-    alpha,
-    beta,
-    rc,
+    Patch,
+    Minor,
+    Major,
+    Release,
+    Alpha,
+    Beta,
+    Rc,
 }
 
 /// The Semantic data structure represents a semantic version number.

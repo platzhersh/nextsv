@@ -1,4 +1,3 @@
-use clap::Arg;
 use clap::{Parser, ValueEnum};
 use nextsv_lib::Error;
 use nextsv_lib::VersionTag;
@@ -27,7 +26,7 @@ fn main() -> Result<(), Error> {
     // What are the conventional commits since that tag?
     let args = Cli::parse();
 
-    let mut latest_version = VersionTag::latest("v")?;
+    let latest_version = VersionTag::latest(&args.prefix)?;
 
     if args.verbose {
         eprintln!("Next Version\n------------\n");
@@ -47,12 +46,8 @@ fn main() -> Result<(), Error> {
         }
         eprint!("Next Version: ");
     }
-
-    latest_version = latest_version.commits()?;
-    println!("{:#?}", &latest_version);
-    let next_level = &latest_version.next_level()?;
+    level(latest_version.clone())?;
     version(latest_version, args)?;
-    println!("{}", next_level);
 
     Ok(())
 }
@@ -70,5 +65,13 @@ fn version(mut latest_version: VersionTag, args: Cli) -> Result<(), Error> {
     };
 
     println!("{}", next_version);
+    Ok(())
+}
+
+fn level(mut latest_version: VersionTag) -> Result<(), Error> {
+    latest_version = latest_version.commits()?;
+    println!("{:#?}", &latest_version);
+    let next_level = &latest_version.next_level()?;
+    println!("{}", next_level);
     Ok(())
 }

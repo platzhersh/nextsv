@@ -1,3 +1,4 @@
+use clap::Arg;
 use clap::{Parser, ValueEnum};
 use nextsv_lib::Error;
 use nextsv_lib::VersionTag;
@@ -17,6 +18,8 @@ struct Cli {
     verbose: bool,
     #[clap(short, long, value_enum)]
     force: Option<ForceOptions>,
+    #[clap(short, long, value_parser, default_value = "v")]
+    prefix: String,
 }
 
 fn main() -> Result<(), Error> {
@@ -48,7 +51,13 @@ fn main() -> Result<(), Error> {
     latest_version = latest_version.commits()?;
     println!("{:#?}", &latest_version);
     let next_level = &latest_version.next_level()?;
+    version(latest_version, args)?;
+    println!("{}", next_level);
 
+    Ok(())
+}
+
+fn version(mut latest_version: VersionTag, args: Cli) -> Result<(), Error> {
     let next_version = if let Some(svc) = args.force {
         match svc {
             ForceOptions::Major => latest_version.force_major().next_version(),
@@ -61,7 +70,5 @@ fn main() -> Result<(), Error> {
     };
 
     println!("{}", next_version);
-    println!("{}", next_level);
-
     Ok(())
 }

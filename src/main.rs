@@ -61,7 +61,7 @@ fn main() -> Result<(), Error> {
     };
 
     println!("{}", next_version);
-    println!("{:?}", next_level);
+    println!("{}", next_level);
 
     Ok(())
 }

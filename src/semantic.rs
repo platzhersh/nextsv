@@ -22,6 +22,20 @@ pub enum Level {
     Rc,
 }
 
+impl fmt::Display for Level {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Level::Alpha => write!(f, "alpha"),
+            Level::Patch => write!(f, "patch"),
+            Level::Minor => write!(f, "minor"),
+            Level::Major => write!(f, "major"),
+            Level::Release => write!(f, "release"),
+            Level::Beta => write!(f, "beta"),
+            Level::Rc => write!(f, "rc"),
+        }
+    }
+}
+
 /// The Semantic data structure represents a semantic version number.
 ///
 /// TODO: Implement support for pre-release and build

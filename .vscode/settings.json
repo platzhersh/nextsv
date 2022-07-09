@@ -8,10 +8,11 @@
     ],
     "conventionalCommits.scopes": [
         "CI",
-        "Semantic Version",
-        "Error Management",
+        "semantic",
+        "error",
         "conventional",
         "version_tag",
-        "cli"
+        "cli",
+        "cargo",
     ]
 }

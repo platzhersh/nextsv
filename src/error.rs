@@ -18,6 +18,8 @@ pub enum Error {
     NoVersionTag,
     #[error("First production release already deployed. Current major version: {0}")]
     MajorAlreadyUsed(String),
+    #[error("No conventional commits found")]
+    NoConventionalCommits,
     #[error("0:?")]
     Git2(#[from] git2::Error),
 }

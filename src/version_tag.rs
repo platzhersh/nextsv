@@ -16,7 +16,7 @@ pub struct VersionTag {
     name: Semantic,
     id: Oid,
     conventional: Option<ConventionalCommits>,
-    bump_level: Level,
+    bump_level: Option<Level>,
 }
 
 impl VersionTag {
@@ -199,7 +199,8 @@ impl VersionTag {
         Ok(self)
     }
 
-    pub fn next(&mut self) -> Semantic {
+    #[cfg(feature = "version")]
+    pub fn next_version(&mut self) -> Semantic {
         // clone the current version to mutate for the next version
         let mut next_version = self.name.clone();
 
@@ -235,8 +236,26 @@ impl VersionTag {
         next_version
     }
 
-pub fn bump_level(&self) -> Option<Level> {
-    self.bump_level.clone()
-}
+    #[cfg(feature = "level")]
+    pub fn next_level(&mut self) -> Result<Level, Error> {
+        // check the conventional commits. No conventional commits; no change.
+        if let Some(conventional) = self.conventional.clone() {
+            // Breaking change found in commits
+            if conventional.breaking() || conventional.feat_commits() > 0 {
+                if self.name.major() == 0 {
+                    Ok(Level::Minor)
+                } else {
+                    Ok(Level::Major)
+                }
+            } else {
+                Ok(Level::Patch)
+            }
+        } else {
+            Err(Error::NoConventionalCommits)
+        }
+    }
 
+    pub fn bump_level(&self) -> Option<Level> {
+        self.bump_level.clone()
+    }
 }

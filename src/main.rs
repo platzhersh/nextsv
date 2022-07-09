@@ -45,18 +45,23 @@ fn main() -> Result<(), Error> {
         eprint!("Next Version: ");
     }
 
+    latest_version = latest_version.commits()?;
+    println!("{:#?}", &latest_version);
+    let next_level = &latest_version.next_level()?;
+
     let next_version = if let Some(svc) = args.force {
         match svc {
-            ForceOptions::Major => latest_version.force_major().next(),
-            ForceOptions::Minor => latest_version.force_minor().next(),
-            ForceOptions::Patch => latest_version.force_patch().next(),
+            ForceOptions::Major => latest_version.force_major().next_version(),
+            ForceOptions::Minor => latest_version.force_minor().next_version(),
+            ForceOptions::Patch => latest_version.force_patch().next_version(),
             ForceOptions::First => latest_version.promote_first()?.name(),
         }
     } else {
-        latest_version.commits()?.next()
+        latest_version.commits()?.next_version()
     };
 
     println!("{}", next_version);
+    println!("{:?}", next_level);
 
     Ok(())
 }

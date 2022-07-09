@@ -8,11 +8,11 @@ use std::fmt;
 
 use crate::Error;
 
-
 /// Levels for semantic bump
-/// 
-#[derive(Debug, Display)]
+///
+#[derive(Debug, Default, PartialOrd, PartialEq, Eq, Ord, Clone)]
 pub enum Level {
+    #[default]
     Patch,
     Minor,
     Major,

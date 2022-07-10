@@ -62,7 +62,6 @@ fn main() -> Result<(), Error> {
             force,
             prefix,
         } => {
-            eprintln!("The prefix: {}", prefix);
             let latest_version = VersionTag::latest(&prefix)?;
             verbosity(verbose, &latest_version);
             level(latest_version, force)?;
@@ -119,7 +118,7 @@ fn level(latest_version: VersionTag, force: Option<ForceOptions>) -> Result<(), 
         }
     } else {
         let mut latest_version = latest_version.commits()?;
-        println!("{:#?}", &latest_version);
+        // eprintln!("{:#?}", &latest_version);
         latest_version.next_level()?
     };
 

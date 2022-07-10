@@ -107,7 +107,7 @@ impl VersionTag {
         repo.tag_foreach(|id, name| {
             if let Ok(name) = String::from_utf8(name.to_owned()) {
                 if let Some(name) = name.strip_prefix("refs/tags/") {
-                    if name.starts_with('v') {
+                    if name.starts_with(version_prefix) {
                         if let Ok(semantic_version) = Semantic::parse(name, version_prefix) {
                             versions.push(VersionTag::new(semantic_version, id));
                         }

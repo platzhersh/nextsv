@@ -1,5 +1,6 @@
-use clap::{Parser, ValueEnum};
+use clap::{Parser, Subcommand, ValueEnum};
 use nextsv_lib::Error;
+use nextsv_lib::Level;
 use nextsv_lib::VersionTag;
 
 #[derive(ValueEnum, Debug, Clone)]
@@ -10,15 +11,35 @@ enum ForceOptions {
     First,
 }
 
+#[derive(Debug, Subcommand)]
+enum Commands {
+    /// Calculate the version for the next semantic version increase
+    #[clap()]
+    Version {
+        #[clap(short, long, value_parser, default_value_t = false)]
+        verbose: bool,
+        #[clap(short, long, value_enum)]
+        force: Option<ForceOptions>,
+        #[clap(short, long, value_parser, default_value = "v")]
+        prefix: String,
+    },
+    /// Calculate the level for the next semantic version increase
+    #[clap()]
+    Level {
+        #[clap(short, long, value_parser, default_value_t = false)]
+        verbose: bool,
+        #[clap(short, long, value_enum)]
+        force: Option<ForceOptions>,
+        #[clap(short, long, value_parser, default_value = "v")]
+        prefix: String,
+    },
+}
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Cli {
-    #[clap(short, long, value_parser, default_value_t = false)]
-    verbose: bool,
-    #[clap(short, long, value_enum)]
-    force: Option<ForceOptions>,
-    #[clap(short, long, value_parser, default_value = "v")]
-    prefix: String,
+    #[clap(subcommand)]
+    commands: Commands,
 }
 
 fn main() -> Result<(), Error> {
@@ -26,9 +47,33 @@ fn main() -> Result<(), Error> {
     // What are the conventional commits since that tag?
     let args = Cli::parse();
 
-    let latest_version = VersionTag::latest(&args.prefix)?;
+    match args.commands {
+        Commands::Version {
+            verbose,
+            force,
+            prefix,
+        } => {
+            let latest_version = VersionTag::latest(&prefix)?;
+            verbosity(verbose, &latest_version);
+            version(latest_version, force)?;
+        }
+        Commands::Level {
+            verbose,
+            force,
+            prefix,
+        } => {
+            eprintln!("The prefix: {}", prefix);
+            let latest_version = VersionTag::latest(&prefix)?;
+            verbosity(verbose, &latest_version);
+            level(latest_version, force)?;
+        }
+    }
 
-    if args.verbose {
+    Ok(())
+}
+
+fn verbosity(verbose: bool, latest_version: &VersionTag) {
+    if verbose {
         eprintln!("Next Version\n------------\n");
         eprintln!(
             "Conventional commits by type for version: {}",
@@ -46,14 +91,10 @@ fn main() -> Result<(), Error> {
         }
         eprint!("Next Version: ");
     }
-    level(latest_version.clone())?;
-    version(latest_version, args)?;
-
-    Ok(())
 }
 
-fn version(mut latest_version: VersionTag, args: Cli) -> Result<(), Error> {
-    let next_version = if let Some(svc) = args.force {
+fn version(mut latest_version: VersionTag, force: Option<ForceOptions>) -> Result<(), Error> {
+    let next_version = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force_major().next_version(),
             ForceOptions::Minor => latest_version.force_minor().next_version(),
@@ -68,10 +109,20 @@ fn version(mut latest_version: VersionTag, args: Cli) -> Result<(), Error> {
     Ok(())
 }
 
-fn level(mut latest_version: VersionTag) -> Result<(), Error> {
-    latest_version = latest_version.commits()?;
-    println!("{:#?}", &latest_version);
-    let next_level = &latest_version.next_level()?;
+fn level(latest_version: VersionTag, force: Option<ForceOptions>) -> Result<(), Error> {
+    let next_level = if let Some(svc) = force {
+        match svc {
+            ForceOptions::Major => Level::Major,
+            ForceOptions::Minor => Level::Minor,
+            ForceOptions::Patch => Level::Patch,
+            ForceOptions::First => Level::Release,
+        }
+    } else {
+        let mut latest_version = latest_version.commits()?;
+        println!("{:#?}", &latest_version);
+        latest_version.next_level()?
+    };
+
     println!("{}", next_level);
     Ok(())
 }

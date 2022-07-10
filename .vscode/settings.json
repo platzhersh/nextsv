@@ -14,5 +14,6 @@
         "version_tag",
         "cli",
         "cargo",
+        "crate"
     ]
 }

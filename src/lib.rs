@@ -4,6 +4,13 @@
 //! number and the conventional commits that have been made since the
 //! last version has been released.
 //!
+//! Add the dependency to Cargo.toml
+//!
+//! ```toml
+//! [dependencies]
+//! nextsv = "0.2.0"
+//! ```
+//!
 //! ```rust
 //!
 //!     let current_version = get_latest_version_tag();

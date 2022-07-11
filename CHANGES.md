@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
-## [unreleased] - 2022-07-11
+## [0.3.0] - 2022-07-11
 
 ### Documentation
 
@@ -53,5 +53,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-url -->
 [Unreleased]: https://github.com/jerusdp/nextsv/compare/v0.3.0...HEAD
 [0.3.0]: https://github.com/jerusdp/nextsv/compare/v0.2.0...v0.3.0"
-[v0.2.0]: https://github.com/jerudp/nextsv/compare/v0.1.1...v0.2.0
-[v0.1.0]: https://github.com/jerudp/nextsv/compare/...v0.1.0
+[0.2.0]: https://github.com/jerudp/nextsv/compare/v0.1.1...v0.2.0
+[0.1.0]: https://github.com/jerudp/nextsv/compare/...v0.1.0

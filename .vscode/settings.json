@@ -1,9 +1,19 @@
 {
     "cSpell.words": [
-        "nextsv"
+        "nextsv",
+        "reflog",
+        "refs",
+        "revwalk",
+        "workdir"
     ],
     "conventionalCommits.scopes": [
         "CI",
-        "Semantic Version"
+        "semantic",
+        "error",
+        "conventional",
+        "version_tag",
+        "cli",
+        "cargo",
+        "crate"
     ]
 }

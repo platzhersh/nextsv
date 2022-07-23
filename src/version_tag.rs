@@ -245,7 +245,8 @@ impl VersionTag {
             } else if conventional.total_commits() > 0 {
                 Ok(Level::Patch)
             } else {
-                Ok(Level::None)
+                // Ok(Level::None)
+                Err(Error::NoLevelChange)
             }
         } else {
             Err(Error::NoConventionalCommits)

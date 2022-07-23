@@ -20,7 +20,7 @@ pub enum Error {
     MajorAlreadyUsed(String),
     #[error("No conventional commits found")]
     NoConventionalCommits,
-    #[error("No conventional commits requiringa version level change")]
+    #[error("No conventional commits requiring a version level change")]
     NoLevelChange,
     #[error("0:?")]
     Git2(#[from] git2::Error),

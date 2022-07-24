@@ -8,14 +8,24 @@
 //!
 //! ```toml
 //! [dependencies]
-//! nextsv = "0.3.1"
+//! nextsv = {version = "0.3.1", features = ["level", "version"] }
 //! ```
 //!
 //! ```rust
+//! # fn main() -> Result<(), nextsv_lib::Error> {
+//!     use nextsv_lib::VersionTag;
+//!     let version_prefix = "v";
 //!
-//!     let current_version = get_latest_version_tag();
-//!     let new_version = current_version.bump();
+//!     let latest_version = VersionTag::latest(version_prefix)?;
+//!     let for_level = latest_version.clone();
 //!
+//!     let next_version = latest_version.commits()?.next_version();
+//!     let next_level = for_level.commits()?.next_level()?;
+//!
+//!     println!("Next Version: {}\nNext Level: {}", next_version, next_level);
+//!
+//! #    Ok(())
+//! # }
 //! ```
 
 mod conventional;

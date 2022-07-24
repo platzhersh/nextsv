@@ -89,15 +89,18 @@ impl Semantic {
     /// tags representing semantic version numbers.
     ///
     /// ```rust
+    /// # fn main() -> Result<(), nextsv_lib::Error> {
     /// use nextsv_lib::Semantic;
     ///
     /// let tag = "v0.2.3";
-    /// let semantic_version = Semantic::parse(tag, 'v');
+    /// let semantic_version = Semantic::parse(tag, "v")?;
     ///
     /// assert_eq!(0, semantic_version.major());
     /// assert_eq!(2, semantic_version.minor());
     /// assert_eq!(3, semantic_version.patch());
     ///
+    /// # Ok(())
+    /// # }
     /// ```
     /// to identify tags with semantic version numbers
     /// the tag name can be parsed
@@ -187,6 +190,14 @@ impl Semantic {
 
     pub fn major(&self) -> usize {
         self.major
+    }
+
+    pub fn minor(&self) -> usize {
+        self.minor
+    }
+
+    pub fn patch(&self) -> usize {
+        self.patch
     }
 }
 

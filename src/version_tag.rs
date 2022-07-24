@@ -206,30 +206,22 @@ impl VersionTag {
 
         // check the conventional commits. No conventional commits; no change.
         if let Some(conventional) = self.conventional.clone() {
-            let other_commits = conventional.docs_commits()
-                + conventional.chore_commits()
-                + conventional.refactor_commits();
-
             // Breaking change found in commits
             if conventional.breaking() {
                 next_version.breaking_increment();
-                self.bump_level = Some(Level::Major);
-            }
-
-            if next_version.major() == 0 {
-                if conventional.feat_commits() > 0 {
-                    next_version.increment_minor();
+                if self.name.major() == 0 {
                     self.bump_level = Some(Level::Minor);
-                } else if conventional.fix_commits() > 0 || other_commits > 0 {
-                    next_version.increment_patch();
-                    self.bump_level = Some(Level::Patch);
+                } else {
+                    self.bump_level = Some(Level::Major);
                 }
             } else if conventional.feat_commits() > 0 {
                 next_version.increment_minor();
                 self.bump_level = Some(Level::Minor);
-            } else if conventional.fix_commits() > 0 || other_commits > 0 {
+            } else if conventional.total_commits() > 0 {
                 next_version.increment_patch();
                 self.bump_level = Some(Level::Patch);
+            } else {
+                self.bump_level = Some(Level::None);
             }
         }
 
@@ -241,14 +233,20 @@ impl VersionTag {
         // check the conventional commits. No conventional commits; no change.
         if let Some(conventional) = self.conventional.clone() {
             // Breaking change found in commits
-            if conventional.breaking() || conventional.feat_commits() > 0 {
+            // println!("Conventional: {:#?}", conventional);
+            if conventional.breaking() {
                 if self.name.major() == 0 {
                     Ok(Level::Minor)
                 } else {
                     Ok(Level::Major)
                 }
-            } else {
+            } else if conventional.feat_commits() > 0 {
+                Ok(Level::Minor)
+            } else if conventional.total_commits() > 0 {
                 Ok(Level::Patch)
+            } else {
+                // Ok(Level::None)
+                Err(Error::NoLevelChange)
             }
         } else {
             Err(Error::NoConventionalCommits)

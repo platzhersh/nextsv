@@ -76,6 +76,10 @@ impl ConventionalCommits {
         self.refactor_commits
     }
 
+    pub fn total_commits(&self) -> u32 {
+        self.feat_commits + self.fix_commits + self.docs_commits + self.refactor_commits
+    }
+
     pub fn breaking(&self) -> bool {
         self.breaking
     }

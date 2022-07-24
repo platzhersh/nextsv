@@ -10,9 +10,9 @@ use crate::Error;
 
 /// Levels for semantic bump
 ///
-#[derive(Debug, Default, PartialOrd, PartialEq, Eq, Ord, Clone)]
+#[derive(Debug, PartialOrd, PartialEq, Eq, Ord, Clone)]
 pub enum Level {
-    #[default]
+    None,
     Patch,
     Minor,
     Major,
@@ -22,14 +22,21 @@ pub enum Level {
     Rc,
 }
 
+impl Default for Level {
+    fn default() -> Self {
+        Level::None
+    }
+}
+
 impl fmt::Display for Level {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Level::Alpha => write!(f, "alpha"),
+            Level::None => write!(f, "none"),
             Level::Patch => write!(f, "patch"),
             Level::Minor => write!(f, "minor"),
             Level::Major => write!(f, "major"),
             Level::Release => write!(f, "release"),
+            Level::Alpha => write!(f, "alpha"),
             Level::Beta => write!(f, "beta"),
             Level::Rc => write!(f, "rc"),
         }

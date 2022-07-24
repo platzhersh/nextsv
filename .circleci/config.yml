@@ -81,10 +81,24 @@ jobs:
           command: |
             rustup update nightly
             cargo +nightly doc --lib --no-deps --all-features --document-private-items
+
+  release:
+    executor: rust-env
+    steps:
+      - checkout
+      - run:
+          name: Publish update if required
+          command: |
+            cargo install --git https://github.com/gortavoher/nextsv
+            cargo install cargo-release
+            nextsv level && cargo release --no-publish --no-push --sign "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   build-test-docs:
+    when:
+      not:
+        equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
       - build
       - basic-test
@@ -101,3 +115,10 @@ workflows:
       #     requires:
       #       - feature-test
       - docs
+  release-check:
+    when:
+      and:
+        - equal: [scheduled_pipeline, << pipeline.trigger_source >>]
+        - equal: ["release check", << pipeline.schedule.name >>]
+    jobs:
+      - release

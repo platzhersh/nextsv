@@ -92,12 +92,12 @@ jobs:
       - run:
           name: install cargo-release
           command: |
-            cargo install --git https://github.com/gortavoher/nextsv
-      - run:
-          name: install cargo-release
-          command: |
             cargo install cargo-release
       - checkout
+      - run:
+          name: git tag
+          command: |
+            git tag -n
       - run:
           name: Publish update if required
           command: |

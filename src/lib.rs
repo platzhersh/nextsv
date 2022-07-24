@@ -11,7 +11,7 @@
 //! nextsv = {version = "0.3.1", features = ["level", "version"] }
 //! ```
 //!
-//! ```rust
+//! ```no_run
 //! # fn main() -> Result<(), nextsv_lib::Error> {
 //!     use nextsv_lib::VersionTag;
 //!     let version_prefix = "v";

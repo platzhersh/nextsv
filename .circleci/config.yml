@@ -9,7 +9,7 @@ commands:
   cargo-build:
     parameters:
       rust-version:
-        default: "1.61.0"
+        default: "1.62.1"
         type: string
     steps:
       - run:
@@ -30,7 +30,7 @@ jobs:
       - cargo-build:
           rust-version: "stable"
       - cargo-build:
-          rust-version: "1.56.0"
+          rust-version: "1.61.0"
 
   basic-test:
     executor: rust-env

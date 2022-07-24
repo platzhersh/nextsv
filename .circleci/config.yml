@@ -85,12 +85,22 @@ jobs:
   release:
     executor: rust-env
     steps:
+      - run:
+          name: install nextsv cli
+          command: |
+            cargo install --git https://github.com/gortavoher/nextsv
+      - run:
+          name: install cargo-release
+          command: |
+            cargo install --git https://github.com/gortavoher/nextsv
+      - run:
+          name: install cargo-release
+          command: |
+            cargo install cargo-release
       - checkout
       - run:
           name: Publish update if required
           command: |
-            cargo install --git https://github.com/gortavoher/nextsv
-            cargo install cargo-release
             nextsv level && cargo release --no-publish --no-push --sign "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

@@ -10,6 +10,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+### Bug Fixes
+
+- Update rust crate clap to 3.2.11
+- Update rust crate clap to 3.2.12
+- Update rust crate git-conventional to 0.12.0
+- Update rust crate clap to 3.2.13
+- Update rust crate clap to 3.2.14
+- 🐛 Spelling error in error text
+
+### Features
+
+- Create enum of bump levels
+- ✨ add patch level of none when no conventional commits are found
+- Instead of Level::None return and error NoLevelChange
+- Add error for no level change
+
+### Miscellaneous Tasks
+
+- 🎨 Update changelogs
+- Update github/codeql-action digest to d8c9c72
+- Update ossf/scorecard-action digest to 88c5e32
+- Update dependency cimg/rust to v1.62
+- Update ossf/scorecard-action digest to d434c40
+- Update ossf/scorecard-action digest to ccd0038
+- Update github/codeql-action digest to ba95eeb
+- Update github/codeql-action digest to b8bd06e
+- Update ossf/scorecard-action digest to 0c37758
+- Update github/codeql-action digest to 8171514
+- Update ossf/scorecard-action digest to 3155d13
+- ✨ Add workflow to check  for and release
+
 ## [0.3.1] - 2022-07-11
 
 ## Fix

@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+### Bug Fixes
+
+- Update dependencies
+- 🐛 Spelling error in error text
+
+### Features
+
+- Create enum of bump levels
+- ✨ add patch level of none when no conventional commits are found
+- Instead of Level::None return and error NoLevelChange
+- Add error for no level change
+
+### Miscellaneous Tasks
+
+- Update changelogs
+- Update CI dependencies
+- ✨ Add workflow to check for and release
+
 ## [0.3.1] - 2022-07-11
 
 ## Fix

@@ -95,14 +95,8 @@ jobs:
             cargo install cargo-release
       - checkout
       - run:
-          name: git tag
-          command: |
-            pwd
-            git tag -n
-      - run:
           name: Publish update if required
           command: |
-            cd '/home/circleci/project'
             nextsv level && cargo release --no-publish --no-push --sign "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

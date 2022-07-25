@@ -88,7 +88,7 @@ jobs:
       - run:
           name: install nextsv cli
           command: |
-            cargo install --git https://github.com/gortavoher/nextsv
+            cargo install --git https://github.com/jerusdp/nextsv
       - run:
           name: install cargo-release
           command: |

@@ -85,6 +85,13 @@ jobs:
   release:
     executor: rust-env
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "72:e9:62:97:19:01:91:43:21:83:67:97:d3:9d:4a:3a"
+      - run:
+          name: import GPG key
+          command: |
+            echo -e "GPG_KEY" | gpg import
       - run:
           name: install nextsv cli
           command: |

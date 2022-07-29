@@ -106,6 +106,7 @@ jobs:
           command: |
             git config user.email $USER_EMAIL
             git config user.name $USER_NAME
+            git config --global gpg.program gpg
             nextsv level && cargo release --no-publish --execute --no-confirm "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

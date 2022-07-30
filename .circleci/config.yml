@@ -108,9 +108,7 @@ jobs:
             git config user.name "$USER_NAME"
             git config --global gpg.program gpg
             git config --global user.signingkey 9F13CF618E462C69
-            git config -l
-            echo "test" | gpg --clearsign
-            nextsv level && cargo release --no-publish --execute --no-confirm "$(nextsv level)"
+            nextsv level && cargo release -vv --no-publish --execute --no-confirm "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:

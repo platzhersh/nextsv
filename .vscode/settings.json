@@ -4,6 +4,7 @@
         "reflog",
         "refs",
         "revwalk",
+        "signingkey",
         "workdir"
     ],
     "conventionalCommits.scopes": [

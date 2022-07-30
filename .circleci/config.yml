@@ -87,7 +87,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "72:e9:62:97:19:01:91:43:21:83:67:97:d3:9d:4a:3a"
+            - "5a:b3:e5:e0:25:90:ba:58:3e:93:df:10:19:4c:68:e3"
       - run:
           name: import GPG key
           command: |

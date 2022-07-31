@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand, ValueEnum};
 use nextsv_lib::Error;
 use nextsv_lib::Level;
-use nextsv_lib::VersionTag;
+use nextsv_lib::VersionCalculator;
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -53,7 +53,7 @@ fn main() -> Result<(), Error> {
             force,
             prefix,
         } => {
-            let latest_version = VersionTag::latest(&prefix)?;
+            let latest_version = VersionCalculator::new(&prefix)?;
             verbosity(verbose, &latest_version);
             version(latest_version, force)?;
         }
@@ -62,7 +62,7 @@ fn main() -> Result<(), Error> {
             force,
             prefix,
         } => {
-            let latest_version = VersionTag::latest(&prefix)?;
+            let latest_version = VersionCalculator::new(&prefix)?;
             verbosity(verbose, &latest_version);
             level(latest_version, force)?;
         }
@@ -71,7 +71,7 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn verbosity(verbose: bool, latest_version: &VersionTag) {
+fn verbosity(verbose: bool, latest_version: &VersionCalculator) {
     if verbose {
         eprintln!("Next Version\n------------\n");
         eprintln!(
@@ -92,7 +92,10 @@ fn verbosity(verbose: bool, latest_version: &VersionTag) {
     }
 }
 
-fn version(mut latest_version: VersionTag, force: Option<ForceOptions>) -> Result<(), Error> {
+fn version(
+    mut latest_version: VersionCalculator,
+    force: Option<ForceOptions>,
+) -> Result<(), Error> {
     let next_version = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force_major().next_version(),
@@ -108,7 +111,7 @@ fn version(mut latest_version: VersionTag, force: Option<ForceOptions>) -> Resul
     Ok(())
 }
 
-fn level(latest_version: VersionTag, force: Option<ForceOptions>) -> Result<(), Error> {
+fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Result<(), Error> {
     let next_level = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => Level::Major,

@@ -268,4 +268,13 @@ impl VersionCalculator {
     pub fn bump_level(&self) -> Option<Level> {
         self.bump_level.clone()
     }
+
+    pub fn promote_first(self) -> Result<Self, Error> {
+        let current_version = self.current_version.clone().promote_first()?;
+        Ok(VersionCalculator {
+            current_version,
+            conventional: self.conventional.clone(),
+            bump_level: self.bump_level,
+        })
+    }
 }

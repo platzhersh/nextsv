@@ -11,22 +11,15 @@ use crate::{ConventionalCommits, Error, Level, Semantic};
 use git2::{Oid, Repository};
 
 /// Describes a tag
-#[derive(Debug, PartialEq, PartialOrd, Eq, Clone, Ord)]
-pub struct VersionTag {
+#[derive(Default, Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
+struct VersionTag {
     name: Semantic,
-    id: Oid,
-    conventional: Option<ConventionalCommits>,
-    bump_level: Option<Level>,
+    id: Option<Oid>,
 }
 
 impl VersionTag {
     fn new(name: Semantic, id: Oid) -> Self {
-        VersionTag {
-            name,
-            id,
-            conventional: None,
-            bump_level: None,
-        }
+        VersionTag { name, id: Some(id) }
     }
 
     /// The  name field
@@ -35,8 +28,60 @@ impl VersionTag {
     }
 
     /// The id field
-    pub fn id(&self) -> Oid {
+    pub fn id(&self) -> Option<Oid> {
         self.id
+    }
+
+    /// The latest semantic version tag (vx.y.z)
+    ///
+    pub fn latest(version_prefix: &str) -> Result<Self, Error> {
+        let repo = Repository::open(".")?;
+        let mut versions = vec![];
+        repo.tag_foreach(|id, name| {
+            if let Ok(name) = String::from_utf8(name.to_owned()) {
+                if let Some(name) = name.strip_prefix("refs/tags/") {
+                    if name.starts_with(version_prefix) {
+                        if let Ok(semantic_version) = Semantic::parse(name, version_prefix) {
+                            versions.push(VersionTag::new(semantic_version, id));
+                        }
+                    }
+                }
+            }
+            true
+        })?;
+
+        versions.sort();
+        let last_version = versions.last().cloned();
+
+        match last_version {
+            Some(v) => Ok(v),
+            None => Err(Error::NoVersionTag),
+        }
+    }
+
+    /// Promote the first production version (1.0.0)
+    ///
+    pub fn promote_first(&mut self) -> Result<Self, Error> {
+        self.name.first_production()?;
+        Ok(self.clone())
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct VersionCalculator {
+    current_version: VersionTag,
+    conventional: Option<ConventionalCommits>,
+    bump_level: Option<Level>,
+}
+
+impl VersionCalculator {
+    pub fn new(version_prefix: &str) -> Result<VersionCalculator, Error> {
+        let current_version = VersionTag::latest(version_prefix)?;
+        Ok(VersionCalculator {
+            current_version,
+            conventional: None,
+            bump_level: None,
+        })
     }
 
     /// The count of feature commits in the conventional commits field
@@ -99,33 +144,6 @@ impl VersionTag {
         }
     }
 
-    /// The latest semantic version tag (vx.y.z)
-    ///
-    pub fn latest(version_prefix: &str) -> Result<Self, Error> {
-        let repo = Repository::open(".")?;
-        let mut versions = vec![];
-        repo.tag_foreach(|id, name| {
-            if let Ok(name) = String::from_utf8(name.to_owned()) {
-                if let Some(name) = name.strip_prefix("refs/tags/") {
-                    if name.starts_with(version_prefix) {
-                        if let Ok(semantic_version) = Semantic::parse(name, version_prefix) {
-                            versions.push(VersionTag::new(semantic_version, id));
-                        }
-                    }
-                }
-            }
-            true
-        })?;
-
-        versions.sort();
-        let last_version = versions.last().cloned();
-
-        match last_version {
-            Some(v) => Ok(v),
-            None => Err(Error::NoVersionTag),
-        }
-    }
-
     /// Construct conventional commits that forces Major update
     ///
     pub fn force_major(&mut self) -> Self {
@@ -153,13 +171,6 @@ impl VersionTag {
         self.clone()
     }
 
-    /// Promote the first production version (1.0.0)
-    ///
-    pub fn promote_first(&mut self) -> Result<Self, Error> {
-        self.name.first_production()?;
-        Ok(self.clone())
-    }
-
     /// The number of conventional commits created since the tag was created
     ///
     pub fn commits(mut self) -> Result<Self, Error> {
@@ -167,7 +178,7 @@ impl VersionTag {
         let mut revwalk = repo.revwalk()?;
         revwalk.set_sorting(git2::Sort::NONE)?;
         revwalk.push_head()?;
-        let glob = format!("refs/tags/{}", self.name);
+        let glob = format!("refs/tags/{}", self.current_version.name());
         revwalk.hide_ref(&glob)?;
 
         macro_rules! filter_try {
@@ -202,16 +213,17 @@ impl VersionTag {
     #[cfg(feature = "version")]
     pub fn next_version(&mut self) -> Semantic {
         // clone the current version to mutate for the next version
-        let mut next_version = self.name.clone();
+        let mut next_version = self.current_version.name.clone();
 
         // check the conventional commits. No conventional commits; no change.
         if let Some(conventional) = self.conventional.clone() {
             // Breaking change found in commits
             if conventional.breaking() {
-                next_version.breaking_increment();
-                if self.name.major() == 0 {
+                if next_version.major() == 0 {
+                    next_version.increment_minor();
                     self.bump_level = Some(Level::Minor);
                 } else {
+                    next_version.increment_major();
                     self.bump_level = Some(Level::Major);
                 }
             } else if conventional.feat_commits() > 0 {
@@ -235,7 +247,7 @@ impl VersionTag {
             // Breaking change found in commits
             // println!("Conventional: {:#?}", conventional);
             if conventional.breaking() {
-                if self.name.major() == 0 {
+                if self.current_version.name().major() == 0 {
                     Ok(Level::Minor)
                 } else {
                     Ok(Level::Major)

@@ -114,7 +114,7 @@ jobs:
             set -exo pipefail
             nextsv level
             BRANCH="Release-$(nextsv version)"
-            git checkout -t origin/"$BRANCH"
+            git checkout -t -b "$BRANCH"
       - run:
           name: Publish update if required
           command: |

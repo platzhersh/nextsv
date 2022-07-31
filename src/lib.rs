@@ -36,4 +36,4 @@ mod version_tag;
 pub(crate) use conventional::ConventionalCommits;
 pub use error::Error;
 pub use semantic::{Level, Semantic};
-pub use version_tag::VersionTag;
+pub use version_tag::VersionCalculator;

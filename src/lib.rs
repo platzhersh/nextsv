@@ -13,10 +13,10 @@
 //!
 //! ```no_run
 //! # fn main() -> Result<(), nextsv_lib::Error> {
-//!     use nextsv_lib::VersionTag;
+//!     use nextsv_lib::VersionCalculator;
 //!     let version_prefix = "v";
 //!
-//!     let latest_version = VersionTag::latest(version_prefix)?;
+//!     let latest_version = VersionCalculator::new(version_prefix)?;
 //!     let for_level = latest_version.clone();
 //!
 //!     let next_version = latest_version.commits()?.next_version();

@@ -84,6 +84,12 @@ impl VersionCalculator {
         })
     }
 
+    /// The the name of the current version
+    /// If the conventional commits field has not been set returns 0
+    pub fn name(&self) -> Semantic {
+        self.current_version.name()
+    }
+
     /// The count of feature commits in the conventional commits field
     /// If the conventional commits field has not been set returns 0
     pub fn feat_commits(&self) -> u32 {

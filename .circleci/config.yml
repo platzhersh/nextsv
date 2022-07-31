@@ -112,7 +112,8 @@ jobs:
           name: Publish update if required
           command: |
             set -exo pipefail
-            nextsv level && cargo release -vv --token CARGO_REGISTRY_TOKEN --execute --no-confirm "$(nextsv level)"
+            cargo login "$CARGO_REGISTRY_TOKEN"
+            nextsv level && cargo release -vv --execute --no-confirm "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:

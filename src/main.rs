@@ -101,7 +101,7 @@ fn version(
             ForceOptions::Major => latest_version.force_major().next_version(),
             ForceOptions::Minor => latest_version.force_minor().next_version(),
             ForceOptions::Patch => latest_version.force_patch().next_version(),
-            ForceOptions::First => latest_version.promote_first()?.name(),
+            ForceOptions::First => latest_version.promote_first()?,
         }
     } else {
         latest_version.commits()?.next_version()

@@ -12,7 +12,7 @@
         "semantic",
         "error",
         "conventional",
-        "version_tag",
+        "calculator",
         "cli",
         "cargo",
         "crate"

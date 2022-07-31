@@ -28,12 +28,12 @@
 //! # }
 //! ```
 
+mod calculator;
 mod conventional;
 mod error;
 mod semantic;
-mod version_tag;
 
+pub use calculator::VersionCalculator;
 pub(crate) use conventional::ConventionalCommits;
 pub use error::Error;
 pub use semantic::{Level, Semantic};
-pub use version_tag::VersionCalculator;

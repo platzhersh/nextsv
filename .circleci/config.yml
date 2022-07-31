@@ -109,16 +109,9 @@ jobs:
             git config --global gpg.program gpg
             git config --global user.signingkey 9F13CF618E462C69
       - run:
-          name: Checkout Release Branch
-          command: |
-            set -exo pipefail
-            nextsv level
-            BRANCH="Release-$(nextsv version)"
-            git checkout -t -b "$BRANCH"
-      - run:
           name: Publish update if required
           command: |
-            nextsv level && cargo release -vv --no-publish --execute --no-confirm "$(nextsv level)"
+            nextsv level && cargo release -vv --execute --no-confirm "$(nextsv level)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:

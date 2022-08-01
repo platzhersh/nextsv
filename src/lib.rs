@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! nextsv = {version = "0.3.1", features = ["level", "version"] }
+//! nextsv = {version = "0.4.0", features = ["level", "version"] }
 //! ```
 //!
 //! ```no_run

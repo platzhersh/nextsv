@@ -7,11 +7,6 @@ use std::collections::HashMap;
 pub struct ConventionalCommits {
     commits: Vec<String>,
     counts: HashMap<String, u32>,
-    feat_count: u32,
-    fix_count: u32,
-    docs_count: u32,
-    chore_count: u32,
-    refactor_count: u32,
     breaking: bool,
 }
 
@@ -27,25 +22,6 @@ impl ConventionalCommits {
             ) {
                 self.increment_counts(conventional.type_());
 
-                if conventional.type_() == git_conventional::Type::FEAT {
-                    self.feat_count += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::FIX {
-                    self.fix_count += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::DOCS {
-                    self.docs_count += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::CHORE {
-                    self.chore_count += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::REFACTOR {
-                    self.refactor_count += 1;
-                }
                 if !self.breaking {
                     self.breaking = conventional.breaking();
                 }
@@ -66,28 +42,16 @@ impl ConventionalCommits {
         *counter += 1;
     }
 
-    pub fn feat_commits(&self) -> u32 {
-        self.feat_count
+    pub fn counts(&self) -> HashMap<String, u32> {
+        self.counts.clone()
     }
 
-    pub fn fix_commits(&self) -> u32 {
-        self.fix_count
+    pub fn commits_by_type(&self, commit_type: &str) -> u32 {
+        self.counts.get(commit_type).unwrap_or(&0_u32).to_owned()
     }
 
-    pub fn docs_commits(&self) -> u32 {
-        self.docs_count
-    }
-
-    pub fn chore_commits(&self) -> u32 {
-        self.chore_count
-    }
-
-    pub fn refactor_commits(&self) -> u32 {
-        self.refactor_count
-    }
-
-    pub fn total_commits(&self) -> u32 {
-        self.feat_count + self.fix_count + self.docs_count + self.refactor_count
+    pub fn commits_all_types(&self) -> u32 {
+        self.counts.values().sum()
     }
 
     pub fn breaking(&self) -> bool {
@@ -104,14 +68,16 @@ impl ConventionalCommits {
     /// Set feat_commits count to one
     ///
     pub fn set_one_feat(&mut self) -> &mut Self {
-        self.feat_count = 1;
+        self.increment_counts(git_conventional::Type::FEAT);
+        // self.feat_count = 1;
         self
     }
 
     /// Set feat_commits count to one
     ///
     pub fn set_one_fix(&mut self) -> &mut Self {
-        self.fix_count = 1;
+        self.increment_counts(git_conventional::Type::FIX);
+        // self.fix_count = 1;
         self
     }
 }

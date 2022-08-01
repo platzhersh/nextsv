@@ -60,53 +60,17 @@ impl VersionCalculator {
         self.current_version.clone()
     }
 
-    /// The count of feature commits in the conventional commits field
+    /// The count of commits of a type in the conventional commits field
     /// If the conventional commits field has not been set returns 0
-    pub fn feat_commits(&self) -> u32 {
-        if self.conventional.is_some() {
-            self.conventional.as_ref().unwrap().feat_commits()
+    pub fn types(&self, commit_type: &str) -> u32 {
+        if let Some(conventional) = self.conventional.clone() {
+            conventional
+                .counts()
+                .get(commit_type)
+                .unwrap_or(&0_u32)
+                .to_owned()
         } else {
-            0
-        }
-    }
-
-    /// The count of fix commits in the conventional commits field
-    /// If the conventional commits field has not been set returns 0
-    pub fn fix_commits(&self) -> u32 {
-        if self.conventional.is_some() {
-            self.conventional.as_ref().unwrap().fix_commits()
-        } else {
-            0
-        }
-    }
-
-    /// The count of docs commits in the conventional commits field
-    /// If the conventional commits field has not been set returns 0
-    pub fn docs_commits(&self) -> u32 {
-        if self.conventional.is_some() {
-            self.conventional.as_ref().unwrap().docs_commits()
-        } else {
-            0
-        }
-    }
-
-    /// The count of chore commits in the conventional commits field
-    /// If the conventional commits field has not been set returns 0
-    pub fn chore_commits(&self) -> u32 {
-        if self.conventional.is_some() {
-            self.conventional.as_ref().unwrap().chore_commits()
-        } else {
-            0
-        }
-    }
-
-    /// The count of refactor commits in the conventional commits field
-    /// If the conventional commits field has not been set returns 0
-    pub fn refactor_commits(&self) -> u32 {
-        if self.conventional.is_some() {
-            self.conventional.as_ref().unwrap().refactor_commits()
-        } else {
-            0
+            0_u32
         }
     }
 
@@ -202,10 +166,10 @@ impl VersionCalculator {
                     next_version.increment_major();
                     self.bump_level = Some(Level::Major);
                 }
-            } else if conventional.feat_commits() > 0 {
+            } else if 0 < conventional.commits_by_type("feat") {
                 next_version.increment_minor();
                 self.bump_level = Some(Level::Minor);
-            } else if conventional.total_commits() > 0 {
+            } else if 0 < conventional.commits_all_types() {
                 next_version.increment_patch();
                 self.bump_level = Some(Level::Patch);
             } else {
@@ -228,9 +192,9 @@ impl VersionCalculator {
                 } else {
                     Ok(Level::Major)
                 }
-            } else if conventional.feat_commits() > 0 {
+            } else if 0 < conventional.commits_by_type("feat") {
                 Ok(Level::Minor)
-            } else if conventional.total_commits() > 0 {
+            } else if 0 < conventional.commits_all_types() {
                 Ok(Level::Patch)
             } else {
                 // Ok(Level::None)

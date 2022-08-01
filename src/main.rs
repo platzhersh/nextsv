@@ -78,11 +78,11 @@ fn verbosity(verbose: bool, latest_version: &VersionCalculator) {
             "Conventional commits by type for version: {}",
             &latest_version.name()
         );
-        eprintln!("  feat:       {}", latest_version.feat_commits());
-        eprintln!("  fix:        {}", latest_version.fix_commits());
-        eprintln!("  docs:       {}", latest_version.docs_commits());
-        eprintln!("  chore:      {}", latest_version.chore_commits());
-        eprintln!("  refactor:   {}", latest_version.refactor_commits());
+        eprintln!("  feat:       {}", latest_version.types("feat"));
+        eprintln!("  fix:        {}", latest_version.types("fix"));
+        eprintln!("  docs:       {}", latest_version.types("docs"));
+        eprintln!("  chore:      {}", latest_version.types("chore"));
+        eprintln!("  refactor:   {}", latest_version.types("refactor"));
         if latest_version.breaking() {
             eprintln!("One or more breaking changes");
         } else {
@@ -112,6 +112,7 @@ fn version(
 }
 
 fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Result<(), Error> {
+    println!("Latest version: {:#?}", &latest_version);
     let next_level = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => Level::Major,
@@ -121,7 +122,7 @@ fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Resu
         }
     } else {
         let mut latest_version = latest_version.commits()?;
-        // eprintln!("{:#?}", &latest_version);
+        eprintln!("{:#?}", &latest_version);
         latest_version.next_level()?
     };
 

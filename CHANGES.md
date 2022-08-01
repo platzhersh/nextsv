@@ -10,6 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+### Bug Fixes
+
+- Update dependencies
+
+### Miscellaneous Tasks
+
+- Update changelogs
+- Update CI dependencies
+
+### Refactor
+
+- Implement Default for enum as derive not supported until Rust 1.62.0
+- HashMap for counts
+- VersionCalculator instead of VersionTag as oid not required
+- Rename latest() to new() in VersionCalculator
+- Rename module version_tag to calculator
+
 ## [0.4.0] - 2202-07-31
 
 ### Bug Fixes

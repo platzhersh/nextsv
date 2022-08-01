@@ -10,6 +10,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+### Bug Fixes
+
+- Failing doc tests
+
+### Features
+
+- Promote_first() method for VersionCalculator
+- ✨ name method for VersionCalculator
+
+### Miscellaneous Tasks
+
+- Add renovate.json
+- Update actions/checkout digest to 2541b12
+- Update actions/upload-artifact digest to 3cea537
+- Update github/codeql-action digest to 47dc295
+- Update ossf/scorecard-action digest to f470ef7
+- Update github/codeql-action digest to 2e0c6ca
+- Update googlecloudplatform/release-please-action action to v3.2.6
+- Update github/codeql-action digest to a965b69
+- Update ossf/scorecard-action digest to f8cb15a
+- Update ossf/scorecard-action digest to 85bc05a
+- Update github/codeql-action digest to 4efa7d6
+- Update github/codeql-action digest to 47bcabd
+- Update github/codeql-action digest to 37d8b51
+- Update ossf/scorecard-action digest to 2e062bc
+- Update ossf/scorecard-action digest to ce330fd
+- Update github/codeql-action digest to e8c48cc
+- Update github/codeql-action digest to 3ea10cc
+- Update github/codeql-action digest to ca8a203
+- Update googlecloudplatform/release-please-action action to v3.2.7
+- Update googlecloudplatform/release-please-action action to v3.2.8
+- Clean up CI
+- Quote user and test using gpg not gpg2
+- Verbose logging for cargo release
+- Update deploy key signature
+- Separate configuration and create branch for release
+- Adding the -b
+- 🎨 Check using nextsv to fail quickly
+
+### Refactor
+
+- 🎨 Implement default as derive is only supported from Rust 1.62.0
+- 🎨 Use HashMap for counts instead of individual counts
+- 🎨 Separate VersionTag struct and VersionCalculator struct for different purposes
+- 🎨 Expose VersionCalculator instead of VersionTag
+- 🎨 Use VersionCalculator instead of VersionTag and new() instead of latest()
+- 🎨 Remove version_tag as storing Oid is not required
+- 🎨 Remove redundant call to name
+- 🎨 rename module version_tag to calculator to better reflect its purpose
+
+### Testing
+
+- Ensure tests including doc tests still run
+
 ## [0.4.0] - 2022-07-31
 
 ### Bug Fixes

@@ -14,7 +14,7 @@ use git2::Repository;
 ///
 pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
     let repo = Repository::open(".")?;
-    log::debug!("opened repo");
+    log::debug!("repo opened to find latest");
     let mut versions = vec![];
     repo.tag_foreach(|_id, name| {
         if let Ok(name) = String::from_utf8(name.to_owned()) {
@@ -120,7 +120,7 @@ impl VersionCalculator {
     ///
     pub fn commits(mut self) -> Result<Self, Error> {
         let repo = git2::Repository::open(".")?;
-        log::debug!("repo opened");
+        log::debug!("repo opened to find conventional commits");
         let mut revwalk = repo.revwalk()?;
         revwalk.set_sorting(git2::Sort::NONE)?;
         revwalk.push_head()?;
@@ -150,7 +150,7 @@ impl VersionCalculator {
 
         for commit in revwalk {
             let commit = commit?;
-            log::trace!("commit found {}", &commit.summary().unwrap_or_default());
+            log::trace!("commit found: {}", &commit.summary().unwrap_or_default());
             conventional_commits.push(&commit);
         }
 

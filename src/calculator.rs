@@ -9,6 +9,7 @@
 
 use crate::{ConventionalCommits, Error, Level, Semantic};
 use git2::Repository;
+use std::fmt;
 
 /// The latest semantic version tag (vx.y.z)
 ///
@@ -39,6 +40,23 @@ pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
             Ok(v)
         }
         None => Err(Error::NoVersionTag),
+    }
+}
+
+#[derive(Debug)]
+pub enum ForceLevel {
+    Major,
+    Minor,
+    Patch,
+}
+
+impl fmt::Display for ForceLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ForceLevel::Major => write!(f, "major"),
+            ForceLevel::Minor => write!(f, "minor"),
+            ForceLevel::Patch => write!(f, "patch"),
+        }
     }
 }
 
@@ -89,29 +107,29 @@ impl VersionCalculator {
         }
     }
 
-    /// Construct conventional commits that forces Major update
+    /// Construct conventional commits that forces an update to a particular
+    /// semver level
     ///
-    pub fn force_major(&mut self) -> Self {
+    /// ### Options for level include:
+    ///
+    /// - Major
+    /// - Minor
+    /// - Patch
+    pub fn force(&mut self, level: ForceLevel) -> Self {
         let mut conventional_commits = ConventionalCommits::new();
-        conventional_commits.set_breaking(true);
-        self.conventional = Some(conventional_commits);
-        self.clone()
-    }
+        log::debug!("forcing a change to {}", level);
+        match level {
+            ForceLevel::Major => {
+                conventional_commits.set_breaking(true);
+            }
+            ForceLevel::Minor => {
+                conventional_commits.set_one_feat();
+            }
+            ForceLevel::Patch => {
+                conventional_commits.set_one_fix();
+            }
+        }
 
-    /// Construct conventional commits that forces Minor update
-    ///
-    pub fn force_minor(&mut self) -> Self {
-        let mut conventional_commits = ConventionalCommits::new();
-        conventional_commits.set_one_feat();
-        self.conventional = Some(conventional_commits);
-        self.clone()
-    }
-
-    /// Construct conventional commits that forces Patch update
-    ///
-    pub fn force_patch(&mut self) -> Self {
-        let mut conventional_commits = ConventionalCommits::new();
-        conventional_commits.set_one_fix();
         self.conventional = Some(conventional_commits);
         self.clone()
     }
@@ -159,7 +177,6 @@ impl VersionCalculator {
         Ok(self)
     }
 
-    #[cfg(feature = "version")]
     pub fn next_version(&mut self) -> (Semantic, Level) {
         // clone the current version to mutate for the next version
         let mut next_version = self.current_version.clone();
@@ -171,7 +188,7 @@ impl VersionCalculator {
             if conventional.breaking() {
                 log::debug!("breaking change found");
                 if next_version.major() == 0 {
-                    log::debug!("Not yet at a stable version");
+                    log::warn!("Not yet at a stable version");
                     next_version.increment_minor();
                     bump = Level::Minor;
                 } else {
@@ -199,43 +216,6 @@ impl VersionCalculator {
 
         (next_version, bump)
     }
-
-    #[cfg(feature = "level")]
-    pub fn next_level(&mut self) -> Result<Level, Error> {
-        // check the conventional commits. No conventional commits; no change.
-        if let Some(conventional) = self.conventional.clone() {
-            if conventional.breaking() {
-                log::debug!("breaking change found");
-                if self.current_version.major() == 0 {
-                    log::debug!("Not yet at a stable version");
-                    Ok(Level::Minor)
-                } else {
-                    Ok(Level::Major)
-                }
-            } else if 0 < conventional.commits_by_type("feat") {
-                log::debug!(
-                    "{} feature commit(s) found requiring increment of minor  number",
-                    &conventional.commits_by_type("feat")
-                );
-                Ok(Level::Minor)
-            } else if 0 < conventional.commits_all_types() {
-                log::debug!(
-                    "{} conventional commit(s) found requiring increment of patch number",
-                    &conventional.commits_all_types()
-                );
-                Ok(Level::Patch)
-            } else {
-                // Ok(Level::None)
-                Err(Error::NoLevelChange)
-            }
-        } else {
-            Err(Error::NoConventionalCommits)
-        }
-    }
-
-    // pub fn bump_level(&self) -> Option<Level> {
-    //     self.bump_level.clone()
-    // }
 
     pub fn promote_first(&mut self) -> Result<(Semantic, Level), Error> {
         Ok((

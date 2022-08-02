@@ -1,7 +1,7 @@
 use std::fmt;
 
 use clap::{Parser, ValueEnum};
-use nextsv::{Error, VersionCalculator};
+use nextsv::{Error, ForceLevel, VersionCalculator};
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -74,9 +74,9 @@ fn calculate(
     };
     let (next_version, bump) = if let Some(svc) = force {
         match svc {
-            ForceOptions::Major => latest_version.force_major().next_version(),
-            ForceOptions::Minor => latest_version.force_minor().next_version(),
-            ForceOptions::Patch => latest_version.force_patch().next_version(),
+            ForceOptions::Major => latest_version.force(ForceLevel::Major).next_version(),
+            ForceOptions::Minor => latest_version.force(ForceLevel::Minor).next_version(),
+            ForceOptions::Patch => latest_version.force(ForceLevel::Patch).next_version(),
             ForceOptions::First => latest_version.promote_first()?,
         }
     } else {

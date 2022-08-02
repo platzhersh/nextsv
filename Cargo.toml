@@ -36,11 +36,6 @@ path = "src/lib.rs"
 name = "nextsv"
 path = "src/main.rs"
 
-[features]
-default=["version", "level"]
-version =[]
-level = []
-
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

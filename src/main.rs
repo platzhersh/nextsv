@@ -44,8 +44,10 @@ enum Commands {
     Level {
         #[clap(flatten)]
         logging: Verbosity,
+        /// Force the calculation of the version number
         #[clap(short, long, value_enum)]
         force: Option<ForceOptions>,
+        /// Prefix string to identify version number tags
         #[clap(short, long, value_parser, default_value = "v")]
         prefix: String,
     },

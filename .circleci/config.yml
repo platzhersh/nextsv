@@ -85,6 +85,15 @@ jobs:
   release:
     executor: rust-env
     steps:
+      - run:
+          name: install nextsv cli
+          command: |
+            cargo install --git https://github.com/jerusdp/nextsv
+      - checkout
+      - run:
+          name: fail quickly by checking if any update required
+          command: |
+            nextsv -q
       - add_ssh_keys:
           fingerprints:
             - "5a:b3:e5:e0:25:90:ba:58:3e:93:df:10:19:4c:68:e3"
@@ -93,14 +102,9 @@ jobs:
           command: |
             echo -e $GPG2 | gpg --batch --no-tty --import --yes
       - run:
-          name: install nextsv cli
-          command: |
-            cargo install --git https://github.com/jerusdp/nextsv
-      - run:
           name: install cargo-release
           command: |
             cargo install cargo-release
-      - checkout
       - run:
           name: Configure git for user and signing
           command: |
@@ -109,11 +113,11 @@ jobs:
             git config --global gpg.program gpg
             git config --global user.signingkey 9F13CF618E462C69
       - run:
-          name: Publish update if required
+          name: Publish update
           command: |
             set -exo pipefail
             cargo login "$CARGO_REGISTRY_TOKEN"
-            nextsv level && cargo release -vv --execute --no-confirm "$(nextsv level)"
+            cargo release -vv --execute --no-confirm "$(nextsv -q)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:

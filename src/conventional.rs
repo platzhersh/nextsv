@@ -1,14 +1,12 @@
 //! Represents a vector of conventional commits
 //!
 
-#[derive(Default, Debug, PartialEq, PartialOrd, Eq, Clone, Ord)]
+use std::collections::HashMap;
+
+#[derive(Default, Debug, PartialEq, Eq, Clone)]
 pub struct ConventionalCommits {
     commits: Vec<String>,
-    feat_commits: u32,
-    fix_commits: u32,
-    docs_commits: u32,
-    chore_commits: u32,
-    refactor_commits: u32,
+    counts: HashMap<String, u32>,
     breaking: bool,
 }
 
@@ -22,25 +20,8 @@ impl ConventionalCommits {
             if let Ok(conventional) = git_conventional::Commit::parse(
                 commit.summary().take().unwrap_or("NotConventional"),
             ) {
-                if conventional.type_() == git_conventional::Type::FEAT {
-                    self.feat_commits += 1;
-                }
+                self.increment_counts(conventional.type_());
 
-                if conventional.type_() == git_conventional::Type::FIX {
-                    self.fix_commits += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::DOCS {
-                    self.docs_commits += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::CHORE {
-                    self.chore_commits += 1;
-                }
-
-                if conventional.type_() == git_conventional::Type::REFACTOR {
-                    self.refactor_commits += 1;
-                }
                 if !self.breaking {
                     self.breaking = conventional.breaking();
                 }
@@ -56,28 +37,21 @@ impl ConventionalCommits {
         self
     }
 
-    pub fn feat_commits(&self) -> u32 {
-        self.feat_commits
+    pub fn increment_counts(&mut self, commit_type: git_conventional::Type) {
+        let counter = self.counts.entry(commit_type.to_string()).or_insert(0);
+        *counter += 1;
     }
 
-    pub fn fix_commits(&self) -> u32 {
-        self.fix_commits
+    pub fn counts(&self) -> HashMap<String, u32> {
+        self.counts.clone()
     }
 
-    pub fn docs_commits(&self) -> u32 {
-        self.docs_commits
+    pub fn commits_by_type(&self, commit_type: &str) -> u32 {
+        self.counts.get(commit_type).unwrap_or(&0_u32).to_owned()
     }
 
-    pub fn chore_commits(&self) -> u32 {
-        self.chore_commits
-    }
-
-    pub fn refactor_commits(&self) -> u32 {
-        self.refactor_commits
-    }
-
-    pub fn total_commits(&self) -> u32 {
-        self.feat_commits + self.fix_commits + self.docs_commits + self.refactor_commits
+    pub fn commits_all_types(&self) -> u32 {
+        self.counts.values().sum()
     }
 
     pub fn breaking(&self) -> bool {
@@ -88,20 +62,6 @@ impl ConventionalCommits {
     ///
     pub fn set_breaking(&mut self, flag: bool) -> &mut Self {
         self.breaking = flag;
-        self
-    }
-
-    /// Set feat_commits count to one
-    ///
-    pub fn set_one_feat(&mut self) -> &mut Self {
-        self.feat_commits = 1;
-        self
-    }
-
-    /// Set feat_commits count to one
-    ///
-    pub fn set_one_fix(&mut self) -> &mut Self {
-        self.fix_commits = 1;
         self
     }
 }

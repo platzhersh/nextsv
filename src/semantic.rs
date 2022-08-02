@@ -89,8 +89,8 @@ impl Semantic {
     /// tags representing semantic version numbers.
     ///
     /// ```rust
-    /// # fn main() -> Result<(), nextsv_lib::Error> {
-    /// use nextsv_lib::Semantic;
+    /// # fn main() -> Result<(), nextsv::Error> {
+    /// use nextsv::Semantic;
     ///
     /// let tag = "v0.2.3";
     /// let semantic_version = Semantic::parse(tag, "v")?;

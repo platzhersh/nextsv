@@ -42,9 +42,7 @@ struct Cli {
     commands: Commands,
 }
 
-fn main() -> Result<(), Error> {
-    // What is the latest tag?
-    // What are the conventional commits since that tag?
+fn main() {
     let args = Cli::parse();
 
     match args.commands {
@@ -55,8 +53,22 @@ fn main() -> Result<(), Error> {
         } => {
             let mut builder = get_logging(logging.log_level());
             builder.init();
-            let latest_version = VersionCalculator::new(&prefix)?;
-            version(latest_version, force)?;
+            log::info!("Calculating the next version number.");
+            let latest_version = match VersionCalculator::new(&prefix) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("{}", e.to_string());
+                    std::process::exit(1)
+                }
+            };
+
+            match version(latest_version, force) {
+                Ok(_) => {}
+                Err(e) => {
+                    log::error!("{}", e.to_string());
+                    std::process::exit(2)
+                }
+            }
         }
         Commands::Level {
             logging,
@@ -65,18 +77,30 @@ fn main() -> Result<(), Error> {
         } => {
             let mut builder = get_logging(logging.log_level());
             builder.init();
-            let latest_version = VersionCalculator::new(&prefix)?;
-            level(latest_version, force)?;
+            log::info!("Calculating the level change for the next version number.");
+            let latest_version = match VersionCalculator::new(&prefix) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("{}", e.to_string());
+                    std::process::exit(1)
+                }
+            };
+
+            match level(latest_version, force) {
+                Ok(_) => {}
+                Err(e) => {
+                    log::error!("{}", e.to_string());
+                    std::process::exit(3)
+                }
+            };
         }
     }
-
-    Ok(())
 }
 
 fn version(
     mut latest_version: VersionCalculator,
     force: Option<ForceOptions>,
-) -> Result<(), Error> {
+) -> Result<(), nextsv_lib::Error> {
     let next_version = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force_major().next_version(),
@@ -92,7 +116,10 @@ fn version(
     Ok(())
 }
 
-fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Result<(), Error> {
+fn level(
+    latest_version: VersionCalculator,
+    force: Option<ForceOptions>,
+) -> Result<(), nextsv_lib::Error> {
     println!("Latest version: {:#?}", &latest_version);
     let next_level = if let Some(svc) = force {
         match svc {

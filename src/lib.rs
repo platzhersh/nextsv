@@ -12,15 +12,13 @@
 //! ```
 //!
 //! ```no_run
-//! # fn main() -> Result<(), nextsv_lib::Error> {
-//!     use nextsv_lib::VersionCalculator;
+//! # fn main() -> Result<(), nextsv::Error> {
+//!     use nextsv::VersionCalculator;
 //!     let version_prefix = "v";
 //!
 //!     let latest_version = VersionCalculator::new(version_prefix)?;
-//!     let for_level = latest_version.clone();
 //!
-//!     let next_version = latest_version.commits()?.next_version();
-//!     let next_level = for_level.commits()?.next_level()?;
+//!     let (next_version, next_level) = latest_version.commits()?.next_version();
 //!
 //!     println!("Next Version: {}\nNext Level: {}", next_version, next_level);
 //!

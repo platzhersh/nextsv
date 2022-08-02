@@ -14,12 +14,14 @@ use git2::Repository;
 ///
 pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
     let repo = Repository::open(".")?;
+    log::debug!("opened repo");
     let mut versions = vec![];
     repo.tag_foreach(|_id, name| {
         if let Ok(name) = String::from_utf8(name.to_owned()) {
             if let Some(name) = name.strip_prefix("refs/tags/") {
                 if name.starts_with(version_prefix) {
                     if let Ok(semantic_version) = Semantic::parse(name, version_prefix) {
+                        log::trace!("found qualifying tag {}", &semantic_version);
                         versions.push(semantic_version);
                     }
                 }
@@ -29,10 +31,13 @@ pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
     })?;
 
     versions.sort();
-    let last_version = versions.last().cloned();
+    log::debug!("versions sorted");
 
-    match last_version {
-        Some(v) => Ok(v),
+    match versions.last().cloned() {
+        Some(v) => {
+            log::trace!("latest version found is {}", &v);
+            Ok(v)
+        }
         None => Err(Error::NoVersionTag),
     }
 }
@@ -111,15 +116,18 @@ impl VersionCalculator {
         self.clone()
     }
 
-    /// The number of conventional commits created since the tag was created
+    /// Get the conventional commits created since the tag was created
     ///
     pub fn commits(mut self) -> Result<Self, Error> {
         let repo = git2::Repository::open(".")?;
+        log::debug!("repo opened");
         let mut revwalk = repo.revwalk()?;
         revwalk.set_sorting(git2::Sort::NONE)?;
         revwalk.push_head()?;
-        let glob = format!("refs/tags/{}", self.current_version);
+        log::debug!("starting the walk from the HEAD");
+        let glob = format!("refs/tags/{}", &self.current_version);
         revwalk.hide_ref(&glob)?;
+        log::debug!("hide commits from {}", &self.current_version);
 
         macro_rules! filter_try {
             ($e:expr) => {
@@ -142,6 +150,7 @@ impl VersionCalculator {
 
         for commit in revwalk {
             let commit = commit?;
+            log::trace!("commit found {}", &commit.summary().unwrap_or_default());
             conventional_commits.push(&commit);
         }
 
@@ -159,7 +168,9 @@ impl VersionCalculator {
         if let Some(conventional) = self.conventional.clone() {
             // Breaking change found in commits
             if conventional.breaking() {
+                log::debug!("breaking change found");
                 if next_version.major() == 0 {
+                    log::debug!("Not yet at a stable version");
                     next_version.increment_minor();
                     self.bump_level = Some(Level::Minor);
                 } else {
@@ -167,9 +178,17 @@ impl VersionCalculator {
                     self.bump_level = Some(Level::Major);
                 }
             } else if 0 < conventional.commits_by_type("feat") {
+                log::debug!(
+                    "{} feature commit(s) found requiring increment of minor  number",
+                    &conventional.commits_by_type("feat")
+                );
                 next_version.increment_minor();
                 self.bump_level = Some(Level::Minor);
             } else if 0 < conventional.commits_all_types() {
+                log::debug!(
+                    "{} conventional commit(s) found requiring increment of patch number",
+                    &conventional.commits_all_types()
+                );
                 next_version.increment_patch();
                 self.bump_level = Some(Level::Patch);
             } else {
@@ -187,14 +206,24 @@ impl VersionCalculator {
             // Breaking change found in commits
             // println!("Conventional: {:#?}", conventional);
             if conventional.breaking() {
+                log::debug!("breaking change found");
                 if self.current_version.major() == 0 {
+                    log::debug!("Not yet at a stable version");
                     Ok(Level::Minor)
                 } else {
                     Ok(Level::Major)
                 }
             } else if 0 < conventional.commits_by_type("feat") {
+                log::debug!(
+                    "{} feature commit(s) found requiring increment of minor  number",
+                    &conventional.commits_by_type("feat")
+                );
                 Ok(Level::Minor)
             } else if 0 < conventional.commits_all_types() {
+                log::debug!(
+                    "{} conventional commit(s) found requiring increment of patch number",
+                    &conventional.commits_all_types()
+                );
                 Ok(Level::Patch)
             } else {
                 // Ok(Level::None)
@@ -205,9 +234,9 @@ impl VersionCalculator {
         }
     }
 
-    pub fn bump_level(&self) -> Option<Level> {
-        self.bump_level.clone()
-    }
+    // pub fn bump_level(&self) -> Option<Level> {
+    //     self.bump_level.clone()
+    // }
 
     pub fn promote_first(&mut self) -> Result<Semantic, Error> {
         Ok(self.current_version.first_production()?.clone())

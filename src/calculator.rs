@@ -160,9 +160,10 @@ impl VersionCalculator {
     }
 
     #[cfg(feature = "version")]
-    pub fn next_version(&mut self) -> Semantic {
+    pub fn next_version(&mut self) -> (Semantic, Level) {
         // clone the current version to mutate for the next version
         let mut next_version = self.current_version.clone();
+        let mut bump = Level::None;
 
         // check the conventional commits. No conventional commits; no change.
         if let Some(conventional) = self.conventional.clone() {
@@ -172,10 +173,10 @@ impl VersionCalculator {
                 if next_version.major() == 0 {
                     log::debug!("Not yet at a stable version");
                     next_version.increment_minor();
-                    self.bump_level = Some(Level::Minor);
+                    bump = Level::Minor;
                 } else {
                     next_version.increment_major();
-                    self.bump_level = Some(Level::Major);
+                    bump = Level::Major;
                 }
             } else if 0 < conventional.commits_by_type("feat") {
                 log::debug!(
@@ -183,28 +184,26 @@ impl VersionCalculator {
                     &conventional.commits_by_type("feat")
                 );
                 next_version.increment_minor();
-                self.bump_level = Some(Level::Minor);
+                bump = Level::Minor;
             } else if 0 < conventional.commits_all_types() {
                 log::debug!(
                     "{} conventional commit(s) found requiring increment of patch number",
                     &conventional.commits_all_types()
                 );
                 next_version.increment_patch();
-                self.bump_level = Some(Level::Patch);
+                bump = Level::Patch;
             } else {
-                self.bump_level = Some(Level::None);
+                bump = Level::None;
             }
         }
 
-        next_version
+        (next_version, bump)
     }
 
     #[cfg(feature = "level")]
     pub fn next_level(&mut self) -> Result<Level, Error> {
         // check the conventional commits. No conventional commits; no change.
         if let Some(conventional) = self.conventional.clone() {
-            // Breaking change found in commits
-            // println!("Conventional: {:#?}", conventional);
             if conventional.breaking() {
                 log::debug!("breaking change found");
                 if self.current_version.major() == 0 {
@@ -238,7 +237,10 @@ impl VersionCalculator {
     //     self.bump_level.clone()
     // }
 
-    pub fn promote_first(&mut self) -> Result<Semantic, Error> {
-        Ok(self.current_version.first_production()?.clone())
+    pub fn promote_first(&mut self) -> Result<(Semantic, Level), Error> {
+        Ok((
+            self.current_version.first_production()?.clone(),
+            Level::Major,
+        ))
     }
 }

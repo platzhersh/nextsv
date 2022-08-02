@@ -1,3 +1,5 @@
+use std::fmt;
+
 use clap::{Parser, Subcommand, ValueEnum};
 use nextsv::{Error, Level, VersionCalculator};
 
@@ -7,6 +9,17 @@ enum ForceOptions {
     Minor,
     Patch,
     First,
+}
+
+impl fmt::Display for ForceOptions {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ForceOptions::Major => write!(f, "major"),
+            ForceOptions::Minor => write!(f, "minor"),
+            ForceOptions::Patch => write!(f, "patch"),
+            ForceOptions::First => write!(f, "first"),
+        }
+    }
 }
 
 #[derive(Debug, Subcommand)]
@@ -20,6 +33,8 @@ enum Commands {
         force: Option<ForceOptions>,
         #[clap(short, long, value_parser, default_value = "v")]
         prefix: String,
+        #[clap(short, long)]
+        level: bool,
     },
     /// Calculate the level for the next semantic version increase
     #[clap()]
@@ -48,6 +63,7 @@ fn main() {
             logging,
             force,
             prefix,
+            level,
         } => {
             let mut builder = get_logging(logging.log_level());
             builder.init();
@@ -60,7 +76,7 @@ fn main() {
                 }
             };
 
-            match version(latest_version, force) {
+            match version(latest_version, force, level) {
                 Ok(_) => {}
                 Err(e) => {
                     log::error!("{}", e.to_string());
@@ -98,8 +114,12 @@ fn main() {
 fn version(
     mut latest_version: VersionCalculator,
     force: Option<ForceOptions>,
+    level: bool,
 ) -> Result<(), Error> {
-    let next_version = if let Some(svc) = force {
+    if let Some(f) = &force {
+        log::debug!("Force option set to {}", f);
+    };
+    let (next_version, bump) = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force_major().next_version(),
             ForceOptions::Minor => latest_version.force_minor().next_version(),
@@ -111,11 +131,17 @@ fn version(
     };
 
     println!("{}", next_version);
+    if level {
+        println!("{}", bump);
+    }
     Ok(())
 }
 
 fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Result<(), Error> {
-    println!("Latest version: {:#?}", &latest_version);
+    if let Some(f) = &force {
+        log::debug!("Force option set to {}", f);
+    };
+
     let next_level = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => Level::Major,
@@ -125,7 +151,6 @@ fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Resu
         }
     } else {
         let mut latest_version = latest_version.commits()?;
-        eprintln!("{:#?}", &latest_version);
         latest_version.next_level()?
     };
 

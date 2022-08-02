@@ -37,7 +37,7 @@ impl ConventionalCommits {
         self
     }
 
-    fn increment_counts(&mut self, commit_type: git_conventional::Type) {
+    pub fn increment_counts(&mut self, commit_type: git_conventional::Type) {
         let counter = self.counts.entry(commit_type.to_string()).or_insert(0);
         *counter += 1;
     }
@@ -62,22 +62,6 @@ impl ConventionalCommits {
     ///
     pub fn set_breaking(&mut self, flag: bool) -> &mut Self {
         self.breaking = flag;
-        self
-    }
-
-    /// Set feat_commits count to one
-    ///
-    pub fn set_one_feat(&mut self) -> &mut Self {
-        self.increment_counts(git_conventional::Type::FEAT);
-        // self.feat_count = 1;
-        self
-    }
-
-    /// Set feat_commits count to one
-    ///
-    pub fn set_one_fix(&mut self) -> &mut Self {
-        self.increment_counts(git_conventional::Type::FIX);
-        // self.fix_count = 1;
         self
     }
 }

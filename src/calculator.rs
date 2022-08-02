@@ -123,10 +123,10 @@ impl VersionCalculator {
                 conventional_commits.set_breaking(true);
             }
             ForceLevel::Minor => {
-                conventional_commits.set_one_feat();
+                conventional_commits.increment_counts(git_conventional::Type::FEAT);
             }
             ForceLevel::Patch => {
-                conventional_commits.set_one_fix();
+                conventional_commits.increment_counts(git_conventional::Type::FIX);
             }
         }
 

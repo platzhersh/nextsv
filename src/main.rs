@@ -16,8 +16,8 @@ enum Commands {
     /// Calculate the version for the next semantic version increase
     #[clap()]
     Version {
-        #[clap(short, long, value_parser, default_value_t = false)]
-        verbose: bool,
+        #[clap(flatten)]
+        logging: Verbosity,
         #[clap(short, long, value_enum)]
         force: Option<ForceOptions>,
         #[clap(short, long, value_parser, default_value = "v")]
@@ -26,8 +26,8 @@ enum Commands {
     /// Calculate the level for the next semantic version increase
     #[clap()]
     Level {
-        #[clap(short, long, value_parser, default_value_t = false)]
-        verbose: bool,
+        #[clap(flatten)]
+        logging: Verbosity,
         #[clap(short, long, value_enum)]
         force: Option<ForceOptions>,
         #[clap(short, long, value_parser, default_value = "v")]
@@ -49,47 +49,28 @@ fn main() -> Result<(), Error> {
 
     match args.commands {
         Commands::Version {
-            verbose,
+            logging,
             force,
             prefix,
         } => {
+            let mut builder = get_logging(logging.log_level());
+            builder.init();
             let latest_version = VersionCalculator::new(&prefix)?;
-            verbosity(verbose, &latest_version);
             version(latest_version, force)?;
         }
         Commands::Level {
-            verbose,
+            logging,
             force,
             prefix,
         } => {
+            let mut builder = get_logging(logging.log_level());
+            builder.init();
             let latest_version = VersionCalculator::new(&prefix)?;
-            verbosity(verbose, &latest_version);
             level(latest_version, force)?;
         }
     }
 
     Ok(())
-}
-
-fn verbosity(verbose: bool, latest_version: &VersionCalculator) {
-    if verbose {
-        eprintln!("Next Version\n------------\n");
-        eprintln!(
-            "Conventional commits by type for version: {}",
-            &latest_version.name()
-        );
-        eprintln!("  feat:       {}", latest_version.types("feat"));
-        eprintln!("  fix:        {}", latest_version.types("fix"));
-        eprintln!("  docs:       {}", latest_version.types("docs"));
-        eprintln!("  chore:      {}", latest_version.types("chore"));
-        eprintln!("  refactor:   {}", latest_version.types("refactor"));
-        if latest_version.breaking() {
-            eprintln!("One or more breaking changes");
-        } else {
-            eprintln!("No breaking change.");
-        }
-        eprint!("Next Version: ");
-    }
 }
 
 fn version(
@@ -128,4 +109,43 @@ fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Resu
 
     println!("{}", next_level);
     Ok(())
+}
+
+pub fn get_logging(level: log::Level) -> env_logger::Builder {
+    let mut builder = env_logger::Builder::new();
+
+    builder.filter(None, level.to_level_filter());
+
+    builder.format_timestamp_secs().format_module_path(false);
+
+    builder
+}
+
+#[derive(clap::Args, Debug, Clone)]
+pub struct Verbosity {
+    /// Pass many times for less log output
+    #[clap(long, short, parse(from_occurrences))]
+    quiet: i8,
+
+    /// Pass many times for more log output
+    ///
+    /// By default, it'll report info. Passing `-v` one time adds debug
+    /// logs, `-vv` adds trace logs.
+    #[clap(long, short, parse(from_occurrences))]
+    verbose: i8,
+}
+
+impl Verbosity {
+    /// Get the log level.
+    pub fn log_level(&self) -> log::Level {
+        let verbosity = 2 - self.quiet + self.verbose;
+
+        match verbosity {
+            i8::MIN..=0 => log::Level::Error,
+            1 => log::Level::Warn,
+            2 => log::Level::Info,
+            3 => log::Level::Debug,
+            4..=i8::MAX => log::Level::Trace,
+        }
+    }
 }

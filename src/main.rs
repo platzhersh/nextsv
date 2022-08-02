@@ -1,7 +1,7 @@
 use std::fmt;
 
-use clap::{Parser, Subcommand, ValueEnum};
-use nextsv::{Error, Level, VersionCalculator};
+use clap::{Parser, ValueEnum};
+use nextsv::{Error, VersionCalculator};
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -21,105 +21,53 @@ impl fmt::Display for ForceOptions {
         }
     }
 }
-
-#[derive(Debug, Subcommand)]
-enum Commands {
-    /// Calculate the version for the next semantic version increase
-    #[clap()]
-    Version {
-        #[clap(flatten)]
-        logging: Verbosity,
-        /// Force the calculation of the version number
-        #[clap(short, long, value_enum)]
-        force: Option<ForceOptions>,
-        /// Prefix string to identify version number tags
-        #[clap(short, long, value_parser, default_value = "v")]
-        prefix: String,
-        /// Report the level of the version number change
-        #[clap(long)]
-        level: bool,
-    },
-    /// Calculate the level for the next semantic version increase
-    #[clap()]
-    Level {
-        #[clap(flatten)]
-        logging: Verbosity,
-        /// Force the calculation of the version number
-        #[clap(short, long, value_enum)]
-        force: Option<ForceOptions>,
-        /// Prefix string to identify version number tags
-        #[clap(short, long, value_parser, default_value = "v")]
-        prefix: String,
-    },
-}
-
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Cli {
-    #[clap(subcommand)]
-    commands: Commands,
+    #[clap(flatten)]
+    logging: Verbosity,
+    /// Force the calculation of the version number
+    #[clap(short, long, value_enum)]
+    force: Option<ForceOptions>,
+    /// Prefix string to identify version number tags
+    #[clap(short, long, value_parser, default_value = "v")]
+    prefix: String,
+    /// Report the level of the version number change
+    #[clap(long)]
+    level: bool,
+    /// Report the version number
+    #[clap(long)]
+    number: bool,
 }
 
 fn main() {
     let args = Cli::parse();
 
-    match args.commands {
-        Commands::Version {
-            logging,
-            force,
-            prefix,
-            level,
-        } => {
-            let mut builder = get_logging(logging.log_level());
-            builder.init();
-            log::info!("Calculating the next version number.");
-            let latest_version = match VersionCalculator::new(&prefix) {
-                Ok(v) => v,
-                Err(e) => {
-                    log::error!("{}", e.to_string());
-                    std::process::exit(1)
-                }
-            };
-
-            match version(latest_version, force, level) {
-                Ok(_) => {}
-                Err(e) => {
-                    log::error!("{}", e.to_string());
-                    std::process::exit(2)
-                }
-            }
+    let mut builder = get_logging(args.logging.log_level());
+    builder.init();
+    log::info!("Calculating the next version number.");
+    let latest_version = match VersionCalculator::new(&args.prefix) {
+        Ok(v) => v,
+        Err(e) => {
+            log::error!("{}", e.to_string());
+            std::process::exit(1)
         }
-        Commands::Level {
-            logging,
-            force,
-            prefix,
-        } => {
-            let mut builder = get_logging(logging.log_level());
-            builder.init();
-            log::info!("Calculating the level change for the next version number.");
-            let latest_version = match VersionCalculator::new(&prefix) {
-                Ok(v) => v,
-                Err(e) => {
-                    log::error!("{}", e.to_string());
-                    std::process::exit(1)
-                }
-            };
+    };
 
-            match level(latest_version, force) {
-                Ok(_) => {}
-                Err(e) => {
-                    log::error!("{}", e.to_string());
-                    std::process::exit(3)
-                }
-            };
+    match calculate(latest_version, args.force, args.level, args.number) {
+        Ok(_) => {}
+        Err(e) => {
+            log::error!("{}", e.to_string());
+            std::process::exit(2)
         }
     }
 }
 
-fn version(
+fn calculate(
     mut latest_version: VersionCalculator,
     force: Option<ForceOptions>,
     level: bool,
+    number: bool,
 ) -> Result<(), Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
@@ -135,31 +83,15 @@ fn version(
         latest_version.commits()?.next_version()
     };
 
-    println!("{}", next_version);
-    if level {
-        println!("{}", bump);
-    }
-    Ok(())
-}
-
-fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Result<(), Error> {
-    if let Some(f) = &force {
-        log::debug!("Force option set to {}", f);
-    };
-
-    let next_level = if let Some(svc) = force {
-        match svc {
-            ForceOptions::Major => Level::Major,
-            ForceOptions::Minor => Level::Minor,
-            ForceOptions::Patch => Level::Patch,
-            ForceOptions::First => Level::Release,
+    match (number, level) {
+        (false, false) => println!("{}", bump),
+        (false, true) => println!("{}", bump),
+        (true, false) => println!("{}", next_version),
+        (true, true) => {
+            println!("{}", next_version);
+            println!("{}", bump);
         }
-    } else {
-        let mut latest_version = latest_version.commits()?;
-        latest_version.next_level()?
-    };
-
-    println!("{}", next_level);
+    }
     Ok(())
 }
 

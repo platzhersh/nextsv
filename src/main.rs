@@ -29,11 +29,14 @@ enum Commands {
     Version {
         #[clap(flatten)]
         logging: Verbosity,
+        /// Force the calculation of the version number
         #[clap(short, long, value_enum)]
         force: Option<ForceOptions>,
+        /// Prefix string to identify version number tags
         #[clap(short, long, value_parser, default_value = "v")]
         prefix: String,
-        #[clap(short, long)]
+        /// Report the level of the version number change
+        #[clap(long)]
         level: bool,
     },
     /// Calculate the level for the next semantic version increase

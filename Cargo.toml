@@ -29,7 +29,7 @@ thiserror = "1.0"
 claim = "0.5"
 
 [lib]
-name = "nextsv_lib"
+name = "nextsv"
 path = "src/lib.rs"
 
 [[bin]]

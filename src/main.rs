@@ -1,7 +1,5 @@
 use clap::{Parser, Subcommand, ValueEnum};
-use nextsv_lib::Error;
-use nextsv_lib::Level;
-use nextsv_lib::VersionCalculator;
+use nextsv::{Error, Level, VersionCalculator};
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -100,7 +98,7 @@ fn main() {
 fn version(
     mut latest_version: VersionCalculator,
     force: Option<ForceOptions>,
-) -> Result<(), nextsv_lib::Error> {
+) -> Result<(), Error> {
     let next_version = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force_major().next_version(),
@@ -116,10 +114,7 @@ fn version(
     Ok(())
 }
 
-fn level(
-    latest_version: VersionCalculator,
-    force: Option<ForceOptions>,
-) -> Result<(), nextsv_lib::Error> {
+fn level(latest_version: VersionCalculator, force: Option<ForceOptions>) -> Result<(), Error> {
     println!("Latest version: {:#?}", &latest_version);
     let next_level = if let Some(svc) = force {
         match svc {

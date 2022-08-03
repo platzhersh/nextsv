@@ -259,11 +259,11 @@ impl VersionCalculator {
     /// Report error if major version number is greater than 0
     pub fn promote_first(&mut self) -> Result<(Semantic, Level), Error> {
         if 0 < self.current_version.major() {
-            Ok(self.force(ForceLevel::Major).next_version())
-        } else {
             Err(Error::MajorAlreadyUsed(
                 self.current_version.major().to_string(),
             ))
+        } else {
+            Ok(self.force(ForceLevel::Major).next_version())
         }
     }
 }

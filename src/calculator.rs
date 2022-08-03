@@ -1,9 +1,9 @@
 //! A semantic tag
 //!
-//! # Example
+//! ## Example
 //!
 //!
-//! # Panics
+//! ## Panics
 //!
 //!
 
@@ -43,10 +43,18 @@ pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
     }
 }
 
+/// The options for choosing the level of a forced change
+///
+/// The enum is used by the force method to define the level
+/// at which the forced change is made.
+///
 #[derive(Debug)]
 pub enum ForceLevel {
+    /// force change to the major component of semver
     Major,
+    /// force change to the minor component of semver
     Minor,
+    /// force change to the patch component of semver
     Patch,
 }
 
@@ -60,25 +68,34 @@ impl fmt::Display for ForceLevel {
     }
 }
 
+/// VersionCalculator
+///
+/// Builds up data about the current version to calculate the next version
+/// number and change level
+///
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct VersionCalculator {
     current_version: Semantic,
     conventional: Option<ConventionalCommits>,
-    bump_level: Option<Level>,
 }
 
 impl VersionCalculator {
+    /// Create a new VersionCalculator struct
+    ///
+    /// ## Parameters
+    ///
+    ///  - version_prefix - identifies version tags
+    ///
     pub fn new(version_prefix: &str) -> Result<VersionCalculator, Error> {
         let current_version = latest(version_prefix)?;
         Ok(VersionCalculator {
             current_version,
             conventional: None,
-            bump_level: None,
         })
     }
 
-    /// The the name of the current version
-    /// If the conventional commits field has not been set returns 0
+    /// Report the current_version
+    ///
     pub fn name(&self) -> Semantic {
         self.current_version.clone()
     }

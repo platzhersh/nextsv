@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update version help text
 - Update log messages
 - Help text for CLI command level
-- Simplyfy interface by removing the subcommands
+- Simplify interface by removing the subcommands
 - Single function to implement force options
 - Use increment_counts
 - Feature flags no longer required

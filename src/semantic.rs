@@ -120,7 +120,10 @@ impl Semantic {
     pub fn parse(tag: &str, version_prefix: &str) -> Result<Self, Error> {
         // the stag string must start with the version_prefix
         if !tag.starts_with(version_prefix) {
-            return Err(Error::NotVersionTag(tag.to_string()));
+            return Err(Error::NotVersionTag(
+                version_prefix.to_string(),
+                tag.to_string(),
+            ));
         }
 
         let version = tag.trim_start_matches(version_prefix);
@@ -141,7 +144,7 @@ impl Semantic {
         }
 
         if count_numbers < 3 {
-            return Err(Error::NotEnoughComponents(count_numbers));
+            return Err(Error::TooFewComponents(count_numbers));
         }
 
         Ok(Semantic::new(

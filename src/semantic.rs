@@ -3,22 +3,35 @@
 //! Holds a semantic version number as defined by
 //! the [Semantic Version Specification v 2.0.0](https://semver.org/spec/v2.0.0.html)
 //!
+//! ## Notes
+//!
+//! Initial implementation does not include support
+//! for pre-release suffixes.
+//!
 
 use std::fmt;
 
 use crate::Error;
 
-/// Levels for semantic bump
+/// Level at which the next increment will be made
 ///
 #[derive(Debug, PartialOrd, PartialEq, Eq, Ord, Clone)]
 pub enum Level {
+    /// When no update has been detected the level is set to none
     None,
+    /// Update will be made at the patch level
     Patch,
+    /// Update will be made at the private level
     Minor,
+    /// Update will be made at the major level
     Major,
+    /// Update is a release removing any pre-release suffixes (for future use)
     Release,
+    /// Update is to an alpha pre-release suffix (for future use)
     Alpha,
+    /// Update is to an beta pre-release suffix (for future use)
     Beta,
+    /// Update is to an rc pre-release suffix (for future use)
     Rc,
 }
 
@@ -142,6 +155,7 @@ impl Semantic {
     /// Increment the version based on a breaking change
     /// When the major number is 0 increment the minor
     /// number else increment the major number
+    ///
     pub fn breaking_increment(&mut self) -> &mut Self {
         if self.major == 0 {
             self.minor += 1;
@@ -155,12 +169,14 @@ impl Semantic {
     }
 
     /// Increment the patch component of the version number by 1
+    ///
     pub fn increment_patch(&mut self) -> &mut Self {
         self.patch += 1;
         self
     }
 
     /// Increment the minor component of the version number by 1
+    ///
     pub fn increment_minor(&mut self) -> &mut Self {
         self.minor += 1;
         self.patch = 0;
@@ -168,6 +184,7 @@ impl Semantic {
     }
 
     /// Increment the major component of the version number by 1
+    ///
     pub fn increment_major(&mut self) -> &mut Self {
         self.major += 1;
         self.minor = 0;
@@ -178,24 +195,28 @@ impl Semantic {
     /// Set the first production release version
     ///
     pub fn first_production(&mut self) -> Result<&mut Self, Error> {
-        if self.major == 0 {
+        if 0 < self.major {
+            return Err(Error::MajorAlreadyUsed(self.major.to_string()));
+        } else {
             self.major = 1;
             self.minor = 0;
             self.patch = 0;
-        } else {
-            return Err(Error::MajorAlreadyUsed(self.major.to_string()));
         }
         Ok(self)
     }
 
+    /// Report the major version number
+    ///
     pub fn major(&self) -> usize {
         self.major
     }
-
+    /// Report the minor version number
     pub fn minor(&self) -> usize {
         self.minor
     }
 
+    /// Report the patch version number
+    ///
     pub fn patch(&self) -> usize {
         self.patch
     }

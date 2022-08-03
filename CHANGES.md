@@ -12,20 +12,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bug Fixes
 
-- Update dependencies
+- Align documentation tests
+
+### Features
+
+- Logging for the crate
+- Flags to report both level and version number or either
+- Report level by default
+- Exit with an error when no level change
 
 ### Miscellaneous Tasks
 
-- Update changelogs
-- Update CI dependencies
+- Update Changelogs
 
 ### Refactor
 
-- Implement Default for enum as derive not supported until Rust 1.62.0
-- HashMap for counts
-- VersionCalculator instead of VersionTag as oid not required
-- Rename latest() to new() in VersionCalculator
-- Rename module version_tag to calculator
+- Remove count fields from the struct
+- Replace old methods with new
+- Replace specific functions with generic
+- Tidy up use statement for nextsv
+- Update version help text
+- Update log messages
+- Help text for CLI command level
+- Simplify interface
+  - remove the subcommands
+  - flags for number and level
+- Single function to implement force options
+- Use increment_counts with type instead of dedicated functions
 
 ## [0.4.0] - 2202-07-31
 

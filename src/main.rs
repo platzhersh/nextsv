@@ -45,7 +45,14 @@ fn main() {
 
     let mut builder = get_logging(args.logging.log_level());
     builder.init();
-    log::info!("Calculating the next version number.");
+
+    match (args.number, args.level) {
+        (false, false) => log::info!("Calculating the next version level"),
+        (false, true) => log::info!("Calculating the next version level"),
+        (true, false) => log::info!("Calculating the next version number"),
+        (true, true) => log::info!("Calculating the next version number and level"),
+    };
+
     let latest_version = match VersionCalculator::new(&args.prefix) {
         Ok(v) => v,
         Err(e) => {

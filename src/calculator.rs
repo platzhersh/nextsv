@@ -1,9 +1,9 @@
 //! A semantic tag
 //!
-//! # Example
+//! ## Example
 //!
 //!
-//! # Panics
+//! ## Panics
 //!
 //!
 
@@ -43,10 +43,18 @@ pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
     }
 }
 
+/// The options for choosing the level of a forced change
+///
+/// The enum is used by the force method to define the level
+/// at which the forced change is made.
+///
 #[derive(Debug)]
 pub enum ForceLevel {
+    /// force change to the major component of semver
     Major,
+    /// force change to the minor component of semver
     Minor,
+    /// force change to the patch component of semver
     Patch,
 }
 
@@ -60,61 +68,77 @@ impl fmt::Display for ForceLevel {
     }
 }
 
+/// VersionCalculator
+///
+/// Builds up data about the current version to calculate the next version
+/// number and change level
+///
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct VersionCalculator {
     current_version: Semantic,
     conventional: Option<ConventionalCommits>,
-    bump_level: Option<Level>,
 }
 
 impl VersionCalculator {
+    /// Create a new VersionCalculator struct
+    ///
+    /// ## Parameters
+    ///
+    ///  - version_prefix - identifies version tags
+    ///
     pub fn new(version_prefix: &str) -> Result<VersionCalculator, Error> {
         let current_version = latest(version_prefix)?;
         Ok(VersionCalculator {
             current_version,
             conventional: None,
-            bump_level: None,
         })
     }
 
-    /// The the name of the current version
-    /// If the conventional commits field has not been set returns 0
+    /// Report the current_version
+    ///
     pub fn name(&self) -> Semantic {
         self.current_version.clone()
     }
 
     /// The count of commits of a type in the conventional commits field
-    /// If the conventional commits field has not been set returns 0
-    pub fn types(&self, commit_type: &str) -> u32 {
-        if let Some(conventional) = self.conventional.clone() {
-            conventional
+    ///
+    /// ## Parameters
+    ///
+    /// - commit_type - identifies the type of commit e.g. "feat"
+    ///
+    /// ## Error handling
+    ///
+    /// If there are no conventional commits it returns 0.
+    /// If conventional is None returns 0.
+    ///
+    pub fn count_commits_by_type(&self, commit_type: &str) -> u32 {
+        match self.conventional.clone() {
+            Some(conventional) => conventional
                 .counts()
                 .get(commit_type)
                 .unwrap_or(&0_u32)
-                .to_owned()
-        } else {
-            0_u32
+                .to_owned(),
+            None => 0_u32,
         }
     }
 
-    /// The breaking flag in the conventional commits field
-    /// If the conventional commits field has not been set returns false
+    /// Report the status of the breaking flag in the conventional commits
+    ///
+    /// ## Error Handling
+    ///
+    /// If the conventional is None returns false
+    ///
     pub fn breaking(&self) -> bool {
-        if self.conventional.is_some() {
-            self.conventional.as_ref().unwrap().breaking()
-        } else {
-            false
+        match self.conventional.clone() {
+            Some(conventional) => conventional.breaking(),
+            None => false,
         }
     }
 
-    /// Construct conventional commits that forces an update to a particular
-    /// semver level
+    /// Force update next_version to return a specific result
     ///
-    /// ### Options for level include:
+    /// Options are defined in `ForceLevel`
     ///
-    /// - Major
-    /// - Minor
-    /// - Patch
     pub fn force(&mut self, level: ForceLevel) -> Self {
         let mut conventional_commits = ConventionalCommits::new();
         log::debug!("forcing a change to {}", level);
@@ -135,6 +159,13 @@ impl VersionCalculator {
     }
 
     /// Get the conventional commits created since the tag was created
+    ///
+    /// Uses `git2` to open the repository and walk back to the
+    /// latest version tag collecting the conventional commits.
+    ///
+    /// ## Error Handling
+    ///
+    /// Errors from 'git2' are returned.
     ///
     pub fn commits(mut self) -> Result<Self, Error> {
         let repo = git2::Repository::open(".")?;
@@ -167,6 +198,8 @@ impl VersionCalculator {
         let mut conventional_commits = ConventionalCommits::new();
 
         for commit in revwalk {
+            // TODO: Better handling of this error as the first error
+            // encountered will abandon the entire function - is this necessary?
             let commit = commit?;
             log::trace!("commit found: {}", &commit.summary().unwrap_or_default());
             conventional_commits.push(&commit);
@@ -177,6 +210,8 @@ impl VersionCalculator {
         Ok(self)
     }
 
+    /// Calculate the next version and report the version number
+    /// and level at which the change is made.
     pub fn next_version(&mut self) -> (Semantic, Level) {
         // clone the current version to mutate for the next version
         let mut next_version = self.current_version.clone();
@@ -217,10 +252,18 @@ impl VersionCalculator {
         (next_version, bump)
     }
 
+    /// Report version 1.0.0 and update level major
+    ///
+    /// ## Error
+    ///
+    /// Report error if major version number is greater than 0
     pub fn promote_first(&mut self) -> Result<(Semantic, Level), Error> {
-        Ok((
-            self.current_version.first_production()?.clone(),
-            Level::Major,
-        ))
+        if 0 < self.current_version.major() {
+            Err(Error::MajorAlreadyUsed(
+                self.current_version.major().to_string(),
+            ))
+        } else {
+            Ok(self.force(ForceLevel::Major).next_version())
+        }
     }
 }

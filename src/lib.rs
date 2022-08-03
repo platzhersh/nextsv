@@ -1,20 +1,29 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![warn(missing_docs)]
+#![cfg_attr(docsrs, warn(rustdoc::missing_doc_code_examples))]
+#![cfg_attr(docsrs, warn(rustdoc::invalid_codeblock_attributes))]
+
 //! Semantic Versioning Management
 //!
-//! Calculates the next semantic version number based on the current version
-//! number and the conventional commits that have been made since the
-//! last version has been released.
+//! Calculates the next semantic version number and level based on
+//! the current version number and the conventional commits made
+//! since the last version has been released.
+//!
+//! ## Usage
 //!
 //! Add the dependency to Cargo.toml
 //!
 //! ```toml
+//!
 //! [dependencies]
-//! nextsv = {version = "0.4.0", features = ["level", "version"] }
+//! nextsv = "0.4.0"
+//!
 //! ```
 //!
 //! ```no_run
 //! # fn main() -> Result<(), nextsv::Error> {
 //!     use nextsv::VersionCalculator;
-//!     let version_prefix = "v";
+//!     let version_prefix = "v"; // Identifies a version tag
 //!
 //!     let latest_version = VersionCalculator::new(version_prefix)?;
 //!

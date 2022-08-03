@@ -85,6 +85,9 @@ jobs:
   release:
     executor: rust-env
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "5a:b3:e5:e0:25:90:ba:58:3e:93:df:10:19:4c:68:e3"
       - run:
           name: install nextsv cli
           command: |
@@ -94,9 +97,6 @@ jobs:
           name: fail quickly by checking if any update required
           command: |
             nextsv -q
-      - add_ssh_keys:
-          fingerprints:
-            - "5a:b3:e5:e0:25:90:ba:58:3e:93:df:10:19:4c:68:e3"
       - run:
           name: import GPG key
           command: |

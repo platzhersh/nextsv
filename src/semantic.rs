@@ -300,7 +300,7 @@ mod tests {
             Err(e) => e.to_string(),
         };
         assert_eq!(
-            "Version tags must start with the letter 'v' but tag is 0.3.90",
+            r#"Version tags must start with "v" but tag is 0.3.90"#,
             semantic
         );
     }

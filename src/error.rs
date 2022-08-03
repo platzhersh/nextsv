@@ -8,7 +8,7 @@ use thiserror::Error;
 pub enum Error {
     /// The tag provided is not a version tag as it does not
     /// start with the provided prefix string.
-    #[error("Version tags must start with {0} but tag is {1}")]
+    #[error("Version tags must start with \"{0}\" but tag is {1}")]
     NotVersionTag(String, String),
     /// Too many components found.
     #[error("Version must have three components but at least {0} were found")]

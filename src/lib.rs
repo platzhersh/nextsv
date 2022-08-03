@@ -1,3 +1,8 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![warn(missing_docs)]
+#![cfg_attr(docsrs, warn(rustdoc::missing_doc_code_examples))]
+#![cfg_attr(docsrs, warn(rustdoc::invalid_codeblock_attributes))]
+
 //! Semantic Versioning Management
 //!
 //! Calculates the next semantic version number and level based on

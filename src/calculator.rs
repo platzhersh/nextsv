@@ -101,16 +101,24 @@ impl VersionCalculator {
     }
 
     /// The count of commits of a type in the conventional commits field
-    /// If the conventional commits field has not been set returns 0
-    pub fn types(&self, commit_type: &str) -> u32 {
-        if let Some(conventional) = self.conventional.clone() {
-            conventional
+    ///
+    /// ## Parameters
+    ///
+    /// - commit_type - identifies the type of commit e.g. "feat"
+    ///
+    /// ## Error handling
+    ///
+    /// If there are no conventional commits it returns 0.
+    /// If there are not conventional commits of the type it returns 0.
+    ///
+    pub fn count_commits_by_type(&self, commit_type: &str) -> u32 {
+        match self.conventional.clone() {
+            Some(conventional) => conventional
                 .counts()
                 .get(commit_type)
                 .unwrap_or(&0_u32)
-                .to_owned()
-        } else {
-            0_u32
+                .to_owned(),
+            None => 0_u32,
         }
     }
 

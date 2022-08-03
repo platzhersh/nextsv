@@ -6,22 +6,26 @@ use thiserror::Error;
 #[non_exhaustive]
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Version tags must start with the letter 'v' but tag is {0}")]
-    NotVersionTag(String),
+    /// The tag provided is not a version tag as it does not
+    /// start with the provided prefix string.
+    #[error("Version tags must start with {0} but tag is {1}")]
+    NotVersionTag(String, String),
+    /// Too many components found.
     #[error("Version must have three components but at least {0} were found")]
     TooManyComponents(usize),
+    /// Too few components found.
     #[error("Version must have three components but only {0} found")]
-    NotEnoughComponents(usize),
+    TooFewComponents(usize),
+    /// The component must be a digit
     #[error("Version must be a number but found {0}")]
     MustBeNumber(String),
+    /// No valid version tag was found in the repository
     #[error("No valid version tag found in the repository")]
     NoVersionTag,
+    /// The first production release (1.0.0) has already been made
     #[error("First production release already deployed. Current major version: {0}")]
     MajorAlreadyUsed(String),
-    #[error("No conventional commits found")]
-    NoConventionalCommits,
-    #[error("No conventional commits requiring a version level change")]
-    NoLevelChange,
+    /// Error passed up from git2
     #[error("0:?")]
     Git2(#[from] git2::Error),
 }

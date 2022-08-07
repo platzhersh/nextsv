@@ -1,7 +1,7 @@
 use std::fmt;
 
 use clap::{Parser, ValueEnum};
-use nextsv::{Error, ForceLevel, Level, VersionCalculator};
+use nextsv::{Error, ForceLevel, VersionCalculator};
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -89,10 +89,6 @@ fn calculate(
     } else {
         latest_version.commits()?.next_version()
     };
-
-    // if bump == Level::None {
-    //    std::process::exit(4)
-    // }
 
     match (number, level) {
         (false, false) => println!("{}", bump),

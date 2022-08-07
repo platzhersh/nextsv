@@ -117,7 +117,7 @@ jobs:
           command: |
             set -exo pipefail
             cargo login "$CARGO_REGISTRY_TOKEN"
-            cargo release -vv --registry https://github.com/rust-lang/crates.io-index.git --execute --no-confirm "$(nextsv -q)"
+            cargo release -vv --registry spare --execute --no-confirm "$(nextsv -q)"
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:

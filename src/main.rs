@@ -90,9 +90,9 @@ fn calculate(
         latest_version.commits()?.next_version()
     };
 
-    if bump == Level::None {
-        std::process::exit(4)
-    }
+    // if bump == Level::None {
+    //    std::process::exit(4)
+    // }
 
     match (number, level) {
         (false, false) => println!("{}", bump),

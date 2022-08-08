@@ -112,7 +112,7 @@ jobs:
           name: Publish update
           command: |
             set -exo pipefail
-            if [ "$(nextsv -q" != "none" ]; then
+            if [ "$(nextsv -q)" != "none" ]; then
                 cargo release -vv --registry spare --execute --no-confirm "$(nextsv -q)"
             else
                  #circleci-agent step halt

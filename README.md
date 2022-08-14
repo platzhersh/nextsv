@@ -15,7 +15,7 @@
 [mit-url]: https://github.com/jerusdp/nextsv/blob/main/LICENSE
 [circleci-batch]:https://circleci.com/gh/jerusdp/nextsv/tree/main.svg?style=svg
 [circleci-url]: https://circleci.com/gh/jerusdp/nextsv/tree/main
-[version-badge]: https://img.shields.io/badge/rust-1.56+-orange.svg
+[version-badge]: https://img.shields.io/badge/rust-1.60+-orange.svg
 [version-url]: https://www.rust-lang.org
 [fossa-badge]: https://app.fossa.com/api/projects/custom%2B22707%2Fgithub.com%2Fjerusdp%2Fnextsv.svg?type=shield
 [fossa-url]: https://app.fossa.com/projects/custom%2B22707%2Fgithub.com%2Fjerusdp%2Fnextsv?ref=badge_shield

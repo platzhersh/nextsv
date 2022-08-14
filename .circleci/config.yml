@@ -1,38 +1,49 @@
 version: 2.1
 
+parameters:
+  min-rust-version:
+    type: string
+    default: "1.60"
+
 executors:
   rust-env:
     docker:
-      - image: cimg/rust:1.62
+      - image: jerusdp/ci-rust:<< pipeline.parameters.min-rust-version >>
 
 commands:
   cargo-build:
     parameters:
       rust-version:
-        default: "1.62.1"
+        default: "stable"
         type: string
     steps:
       - run:
-          name: Update Rust and check build <<parameters.rust-version>>
+          name: Check build <<parameters.rust-version>>
           command: |
-            rustup update <<parameters.rust-version>>
             cargo +<<parameters.rust-version>> check --all-features
 
 jobs:
-  build:
+  required-builds:
     executor: rust-env
     steps:
       - checkout
       - run: cargo --version
       - cargo-build
       - cargo-build:
-          rust-version: "nightly"
-      - cargo-build:
           rust-version: "stable"
       - cargo-build:
-          rust-version: "1.61.0"
+          rust-version: << pipeline.parameters.min-rust-version >>
 
-  basic-test:
+  optional-builds:
+    executor: rust-env
+    steps:
+      - checkout
+      - cargo-build:
+          rust-version: "nightly"
+      - cargo-build:
+          rust-version: "beta"
+
+  basic-tests:
     executor: rust-env
     steps:
       - checkout
@@ -88,19 +99,11 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "5a:b3:e5:e0:25:90:ba:58:3e:93:df:10:19:4c:68:e3"
-      - run:
-          name: install nextsv cli
-          command: |
-            cargo install --git https://github.com/jerusdp/nextsv
       - checkout
       - run:
           name: import GPG key
           command: |
             echo -e $GPG2 | gpg --batch --no-tty --import --yes
-      - run:
-          name: install cargo-release
-          command: |
-            cargo install cargo-release
       - run:
           name: Configure git for user and signing
           command: |
@@ -126,8 +129,8 @@ workflows:
       not:
         equal: [scheduled_pipeline, << pipeline.trigger_source >>]
     jobs:
-      - build
-      - basic-test
+      - required-builds
+      - basic-tests
       # - feature-test:
       #     matrix:
       #       parameters:
@@ -141,6 +144,7 @@ workflows:
       #     requires:
       #       - feature-test
       - docs
+      - optional-builds
   release-check:
     when:
       and:

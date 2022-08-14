@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+### Bug fixes
+
+- Update minimum rust version to 1.60 required for git2
+
 ## [0.5.2] - 2022-08-08
 
 ## [0.5.1] - 2022-08-07

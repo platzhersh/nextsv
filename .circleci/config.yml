@@ -114,7 +114,7 @@ jobs:
       - run:
           name: Publish update
           command: |
-            set -exo pipefail
+            set -eo pipefail
             if [ "$(nextsv -q)" != "none" ]
             then
                 cargo release -vv --registry spare --execute --no-confirm "$(nextsv -q)"

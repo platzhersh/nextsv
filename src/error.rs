@@ -28,6 +28,9 @@ pub enum Error {
     /// No conventional commits in the VersionCalculator struct
     #[error("No conventional commits have been loaded into the VersionCalculator struct. May be called too soon.")]
     NoConventionalCommits,
+    /// Missing required file found. Early exit reporting the first missing file only.
+    #[error("Missing the required file {0}. This is the first required file not found.")]
+    MissingRequiredFile(String),
     /// Error passed up from git2
     #[error("0:?")]
     Git2(#[from] git2::Error),

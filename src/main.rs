@@ -3,6 +3,10 @@ use std::fmt;
 use clap::{Parser, ValueEnum};
 use nextsv::{Error, ForceLevel, VersionCalculator};
 
+const EXIT_NOT_CREATED_CODE: i32 = 1;
+const EXIT_NOT_CALCULATED_CODE: i32 = 2;
+const EXIT_MISSING_REQUIRED_CODE: i32 = 3;
+
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
     Major,
@@ -60,15 +64,30 @@ fn main() {
         Ok(v) => v,
         Err(e) => {
             log::error!("{}", e.to_string());
-            std::process::exit(1)
+            std::process::exit(EXIT_NOT_CREATED_CODE)
         }
     };
+
+    log::trace!("require: {:#?}", args.require);
+
+    // don't check if there is no list
+    if !args.require.is_empty() {
+        // test the provided list of required files
+        if let Err(e) = latest_version.have_required(&args.require) {
+            log::debug!(
+                "Required file(s) {:?} not in the release candidate.",
+                args.require
+            );
+            log::error!("{}", e.to_string());
+            std::process::exit(EXIT_MISSING_REQUIRED_CODE);
+        }
+    }
 
     match calculate(latest_version, args.force, args.level, args.number) {
         Ok(_) => {}
         Err(e) => {
             log::error!("{}", e.to_string());
-            std::process::exit(2)
+            std::process::exit(EXIT_NOT_CALCULATED_CODE)
         }
     }
 }

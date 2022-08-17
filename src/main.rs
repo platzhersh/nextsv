@@ -80,12 +80,9 @@ fn main() {
     match calculate(latest_version, args.force, args.level, args.number, files) {
         Ok(_) => {}
         Err(e) => {
-            log::error!("{}", e.to_string());
-            if e == Error::MissingRequiredFile {
-                log::debug!(
-                    "Required file(s) {:?} not in the release candidate.",
-                    args.require
-                );
+            log::error!("{}", &e.to_string());
+            if let Error::MissingRequiredFile(f) = e {
+                log::debug!("Required file {:?} not in the release candidate.", &f);
                 std::process::exit(EXIT_MISSING_REQUIRED_CODE);
             }
             std::process::exit(EXIT_NOT_CALCULATED_CODE)

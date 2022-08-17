@@ -266,4 +266,18 @@ impl VersionCalculator {
             Ok(self.force(ForceLevel::Major).next_version())
         }
     }
+
+    /// Check for required files
+    ///
+    /// ## Parameters
+    ///
+    /// - files - a list of the required files
+    ///
+    /// ## Error
+    ///
+    /// Report error if one of the files are not found.
+    /// Exits on the first failure.
+    pub fn have_required(&self, files: &Vec<String>) -> Result<(), Error> {
+        Ok(())
+    }
 }

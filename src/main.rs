@@ -38,6 +38,9 @@ struct Cli {
     /// Report the version number
     #[clap(long)]
     number: bool,
+    /// Require changes to these file before building release
+    #[clap(short, long)]
+    require: Vec<String>,
 }
 
 fn main() {

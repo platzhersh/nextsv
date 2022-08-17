@@ -25,6 +25,9 @@ pub enum Error {
     /// The first production release (1.0.0) has already been made
     #[error("First production release already deployed. Current major version: {0}")]
     MajorAlreadyUsed(String),
+    /// No conventional commits in the VersionCalculator struct
+    #[error("No conventional commits have been loaded into the VersionCalculator struct. May be called too soon.")]
+    NoConventionalCommits,
     /// Error passed up from git2
     #[error("0:?")]
     Git2(#[from] git2::Error),

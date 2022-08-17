@@ -39,7 +39,7 @@ struct Cli {
     #[clap(long)]
     number: bool,
     /// Require changes to these file before building release
-    #[clap(short, long)]
+    #[clap(short, long, multiple_values = true)]
     require: Vec<String>,
 }
 

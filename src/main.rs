@@ -70,23 +70,24 @@ fn main() {
 
     log::trace!("require: {:#?}", args.require);
 
-    // don't check if there is no list
-    if !args.require.is_empty() {
-        // test the provided list of required files
-        if let Err(e) = latest_version.have_required(&args.require) {
-            log::debug!(
-                "Required file(s) {:?} not in the release candidate.",
-                args.require
-            );
-            log::error!("{}", e.to_string());
-            std::process::exit(EXIT_MISSING_REQUIRED_CODE);
-        }
-    }
+    // Encapsulate the list of required files in an option
+    let files = if args.require.is_empty() {
+        Option::None
+    } else {
+        Option::Some(args.require)
+    };
 
-    match calculate(latest_version, args.force, args.level, args.number) {
+    match calculate(latest_version, args.force, args.level, args.number, files) {
         Ok(_) => {}
         Err(e) => {
             log::error!("{}", e.to_string());
+            if e == Error::MissingRequiredFile {
+                log::debug!(
+                    "Required file(s) {:?} not in the release candidate.",
+                    args.require
+                );
+                std::process::exit(EXIT_MISSING_REQUIRED_CODE);
+            }
             std::process::exit(EXIT_NOT_CALCULATED_CODE)
         }
     }
@@ -97,10 +98,12 @@ fn calculate(
     force: Option<ForceOptions>,
     level: bool,
     number: bool,
+    files: Option<Vec<String>>,
 ) -> Result<(), Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
+    let latest_version = latest_version.commits()?.has_required(files)?;
     let (next_version, bump) = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force(ForceLevel::Major).next_version(),
@@ -109,7 +112,7 @@ fn calculate(
             ForceOptions::First => latest_version.promote_first()?,
         }
     } else {
-        latest_version.commits()?.next_version()
+        latest_version.next_version()
     };
 
     match (number, level) {

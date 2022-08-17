@@ -278,6 +278,9 @@ impl VersionCalculator {
     /// Report error if one of the files are not found.
     /// Exits on the first failure.
     pub fn have_required(&self, files: &Vec<String>) -> Result<(), Error> {
+        if self.conventional.is_none() {
+            return Err(Error::NoConventionalCommits);
+        }
         Ok(())
     }
 }

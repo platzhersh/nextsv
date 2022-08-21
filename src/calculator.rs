@@ -279,27 +279,22 @@ impl VersionCalculator {
     ///
     /// Report error if one of the files are not found.
     /// Exits on the first failure.
-    pub fn has_required(
-        &mut self,
-        files_required: Option<Vec<String>>,
-    ) -> Result<&mut Self, Error> {
-        if let Some(required_files) = files_required {
-            let files = self.files.clone();
-            if let Some(files) = files {
-                let mut missing_files = vec![];
+    pub fn has_required(&mut self, files_required: Vec<String>) -> Result<&mut Self, Error> {
+        let files = self.files.clone();
+        if let Some(files) = files {
+            let mut missing_files = vec![];
 
-                for required_file in required_files {
-                    if !files.contains(&required_file) {
-                        missing_files.push(required_file.clone());
-                    }
+            for required_file in files_required {
+                if !files.contains(&required_file) {
+                    missing_files.push(required_file.clone());
                 }
-
-                if !missing_files.is_empty() {
-                    return Err(Error::MissingRequiredFile(missing_files));
-                }
-            } else {
-                return Err(Error::NoFilesListed);
             }
+
+            if !missing_files.is_empty() {
+                return Err(Error::MissingRequiredFile(missing_files));
+            }
+        } else {
+            return Err(Error::NoFilesListed);
         }
 
         Ok(self)

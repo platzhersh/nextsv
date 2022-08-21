@@ -100,7 +100,10 @@ fn calculate(
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
-    let latest_version = latest_version.commits()?.has_required(files)?;
+    latest_version = latest_version.commits()?;
+    if let Some(f) = files {
+        latest_version.has_required(f)?;
+    }
     let (next_version, bump) = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force(ForceLevel::Major).next_version(),

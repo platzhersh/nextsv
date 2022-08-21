@@ -77,6 +77,7 @@ impl fmt::Display for ForceLevel {
 pub struct VersionCalculator {
     current_version: Semantic,
     conventional: Option<ConventionalCommits>,
+    files: Option<Vec<String>>,
 }
 
 impl VersionCalculator {
@@ -91,6 +92,7 @@ impl VersionCalculator {
         Ok(VersionCalculator {
             current_version,
             conventional: None,
+            files: None,
         })
     }
 
@@ -271,16 +273,35 @@ impl VersionCalculator {
     ///
     /// ## Parameters
     ///
-    /// - files - a list of the required files
+    /// - files - a list of the required files or None
     ///
     /// ## Error
     ///
     /// Report error if one of the files are not found.
     /// Exits on the first failure.
-    pub fn have_required(&self, files: &Vec<String>) -> Result<(), Error> {
-        if self.conventional.is_none() {
-            return Err(Error::NoConventionalCommits);
+    pub fn has_required(
+        &mut self,
+        files_required: Option<&Vec<String>>,
+    ) -> Result<&mut Self, Error> {
+        if let Some(required_files) = files_required {
+            let files = self.files.clone();
+            if let Some(files) = files {
+                let mut missing_files = vec![];
+
+                for required_file in required_files {
+                    if !files.contains(required_file) {
+                        missing_files.push(required_file.clone());
+                    }
+                }
+
+                if !missing_files.is_empty() {
+                    return Err(Error::MissingRequiredFile(missing_files));
+                }
+            } else {
+                return Err(Error::NoFilesListed);
+            }
         }
-        Ok(())
+
+        Ok(self)
     }
 }

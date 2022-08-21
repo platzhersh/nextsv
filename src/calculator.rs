@@ -281,7 +281,7 @@ impl VersionCalculator {
     /// Exits on the first failure.
     pub fn has_required(
         &mut self,
-        files_required: Option<&Vec<String>>,
+        files_required: Option<Vec<String>>,
     ) -> Result<&mut Self, Error> {
         if let Some(required_files) = files_required {
             let files = self.files.clone();
@@ -289,7 +289,7 @@ impl VersionCalculator {
                 let mut missing_files = vec![];
 
                 for required_file in required_files {
-                    if !files.contains(required_file) {
+                    if !files.contains(&required_file) {
                         missing_files.push(required_file.clone());
                     }
                 }

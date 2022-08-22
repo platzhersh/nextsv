@@ -1,5 +1,7 @@
 //! Error types for nextsv
 
+use std::ffi::OsString;
+
 use thiserror::Error;
 
 /// The error type for nextsv.
@@ -30,7 +32,7 @@ pub enum Error {
     NoConventionalCommits,
     /// Missing required file found.
     #[error("Missing the required file(s): {0:?}.")]
-    MissingRequiredFile(Vec<String>),
+    MissingRequiredFile(Vec<OsString>),
     /// List of files has not been generated yet (or there are no commits). Call `commits` to generate the list by walking back to the current version tag.
     #[error("No files have been listed. May have been called before `commits`.")]
     NoFilesListed,

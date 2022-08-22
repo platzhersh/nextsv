@@ -8,8 +8,8 @@
 //!
 
 use crate::{ConventionalCommits, Error, Level, Semantic};
-use git2::{Repository, TreeWalkMode, TreeWalkResult};
-use std::fmt;
+use git2::{Diff, DiffOptions, Repository, TreeWalkMode, TreeWalkResult};
+use std::{ffi::OsString, fmt};
 
 /// The latest semantic version tag (vx.y.z)
 ///
@@ -77,7 +77,7 @@ impl fmt::Display for ForceLevel {
 pub struct VersionCalculator {
     current_version: Semantic,
     conventional: Option<ConventionalCommits>,
-    files: Option<Vec<String>>,
+    files: Option<Vec<OsString>>,
 }
 
 impl VersionCalculator {
@@ -207,12 +207,14 @@ impl VersionCalculator {
             conventional_commits.push(&commit);
             // Get the files for the files vec
             let tree = commit.tree()?;
-            tree.walk(TreeWalkMode::PreOrder, |_, entry| {
-                if let Some(file) = entry.name() {
-                    log::trace!("file found: {}", file);
-                    files.push(file.to_string())
-                };
-                TreeWalkResult::Ok
+            let diff = repo.diff_tree_to_workdir(Some(&tree), None).unwrap();
+
+            diff.print(git2::DiffFormat::NameOnly, |delta, _hunk, _line| {
+                log::debug!("number of files: {}", delta.nfiles());
+                let file = delta.new_file().path().unwrap().file_name().unwrap();
+                log::trace!("file found: {:?}", file);
+                files.push(file.to_os_string());
+                true
             })
             .unwrap();
         }
@@ -290,7 +292,7 @@ impl VersionCalculator {
     ///
     /// Report error if one of the files are not found.
     /// Exits on the first failure.
-    pub fn has_required(&mut self, files_required: Vec<String>) -> Result<&mut Self, Error> {
+    pub fn has_required(&mut self, files_required: Vec<OsString>) -> Result<&mut Self, Error> {
         let files = self.files.clone();
         if let Some(files) = files {
             let mut missing_files = vec![];

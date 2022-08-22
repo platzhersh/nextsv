@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::fmt;
 
 use clap::{Parser, ValueEnum};
@@ -44,7 +45,7 @@ struct Cli {
     number: bool,
     /// Require changes to these file before building release
     #[clap(short, long, multiple_values = true)]
-    require: Vec<String>,
+    require: Vec<OsString>,
 }
 
 fn main() {
@@ -95,7 +96,7 @@ fn calculate(
     force: Option<ForceOptions>,
     level: bool,
     number: bool,
-    files: Option<Vec<String>>,
+    files: Option<Vec<OsString>>,
 ) -> Result<(), Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);

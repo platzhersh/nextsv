@@ -27,7 +27,7 @@
 //!
 //!     let latest_version = VersionCalculator::new(version_prefix)?;
 //!
-//!     let (next_version, next_level) = latest_version.commits()?.next_version();
+//!     let (next_version, next_level) = latest_version.walk_commits()?.next_version();
 //!
 //!     println!("Next Version: {}\nNext Level: {}", next_version, next_level);
 //!
@@ -40,7 +40,7 @@ mod conventional;
 mod error;
 mod semantic;
 
-pub use calculator::{ForceLevel, VersionCalculator};
+pub use calculator::{ForceLevel, RequireLevel, VersionCalculator};
 pub(crate) use conventional::ConventionalCommits;
 pub use error::Error;
 pub use semantic::{Level, Semantic};

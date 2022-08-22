@@ -7,9 +7,13 @@
 //!
 //!
 
+const FEATURE: &str = "feat";
+const FIX: &str = "fix";
+
 use crate::{ConventionalCommits, Error, Level, Semantic};
+use clap::ValueEnum;
 use git2::Repository;
-use std::fmt;
+use std::{collections::HashSet, ffi::OsString, fmt};
 
 /// The latest semantic version tag (vx.y.z)
 ///
@@ -68,6 +72,36 @@ impl fmt::Display for ForceLevel {
     }
 }
 
+/// The options for choosing the level of a forced file requirement
+///
+/// The enum is used by the has_required method to define the level
+/// at which the the required files are enforced.
+///
+#[derive(Debug, PartialEq, PartialOrd, Clone, ValueEnum)]
+pub enum RequireLevel {
+    /// enforce requirements for breaking only
+    Breaking = 0,
+    /// enforce requirements for features and breaking
+    Feature = 1,
+    /// enforce requirements for fix, feature and breaking
+    Fix = 2,
+    /// enforce requirements for all types
+    Other = 3,
+}
+
+impl std::str::FromStr for RequireLevel {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "breaking" => Ok(RequireLevel::Breaking),
+            "feature" => Ok(RequireLevel::Feature),
+            "fix" => Ok(RequireLevel::Fix),
+            "other" => Ok(RequireLevel::Other),
+            _ => Err(Error::NoVersionTag),
+        }
+    }
+}
 /// VersionCalculator
 ///
 /// Builds up data about the current version to calculate the next version
@@ -77,6 +111,7 @@ impl fmt::Display for ForceLevel {
 pub struct VersionCalculator {
     current_version: Semantic,
     conventional: Option<ConventionalCommits>,
+    files: Option<HashSet<OsString>>,
 }
 
 impl VersionCalculator {
@@ -91,6 +126,7 @@ impl VersionCalculator {
         Ok(VersionCalculator {
             current_version,
             conventional: None,
+            files: None,
         })
     }
 
@@ -167,7 +203,7 @@ impl VersionCalculator {
     ///
     /// Errors from 'git2' are returned.
     ///
-    pub fn commits(mut self) -> Result<Self, Error> {
+    pub fn walk_commits(mut self) -> Result<Self, Error> {
         let repo = git2::Repository::open(".")?;
         log::debug!("repo opened to find conventional commits");
         let mut revwalk = repo.revwalk()?;
@@ -197,15 +233,28 @@ impl VersionCalculator {
 
         let mut conventional_commits = ConventionalCommits::new();
 
-        for commit in revwalk {
-            // TODO: Better handling of this error as the first error
-            // encountered will abandon the entire function - is this necessary?
-            let commit = commit?;
+        // Walk back through the commits
+        let mut files = HashSet::new();
+        for commit in revwalk.flatten() {
+            // Get the summary for the conventional commits vec
             log::trace!("commit found: {}", &commit.summary().unwrap_or_default());
             conventional_commits.push(&commit);
+            // Get the files for the files vec
+            let tree = commit.tree()?;
+            let diff = repo.diff_tree_to_workdir(Some(&tree), None).unwrap();
+
+            diff.print(git2::DiffFormat::NameOnly, |delta, _hunk, _line| {
+                let file = delta.new_file().path().unwrap().file_name().unwrap();
+                log::trace!("file found: {:?}", file);
+                files.insert(file.to_os_string());
+                true
+            })
+            .unwrap();
         }
 
         self.conventional = Some(conventional_commits);
+        log::debug!("Files found: {:#?}", &files);
+        self.files = Some(files);
 
         Ok(self)
     }
@@ -232,7 +281,7 @@ impl VersionCalculator {
                 }
             } else if 0 < conventional.commits_by_type("feat") {
                 log::debug!(
-                    "{} feature commit(s) found requiring increment of minor  number",
+                    "{} feature commit(s) found requiring increment of minor number",
                     &conventional.commits_by_type("feat")
                 );
                 next_version.increment_minor();
@@ -265,5 +314,61 @@ impl VersionCalculator {
         } else {
             Ok(self.force(ForceLevel::Major).next_version())
         }
+    }
+
+    /// Check for required files
+    ///
+    /// ## Parameters
+    ///
+    /// - files - a list of the required files or None
+    ///
+    /// ## Error
+    ///
+    /// Report error if one of the files are not found.
+    /// Exits on the first failure.
+    pub fn has_required(
+        &mut self,
+        files_required: Vec<OsString>,
+        level: RequireLevel,
+    ) -> Result<&mut Self, Error> {
+        // How to use level to ensure that the rule is only applied
+        // when required levels of commits are included
+
+        let mut level_found = RequireLevel::Other;
+        if self.conventional.clone().unwrap().commits_by_type(FIX) > 0 {
+            level_found = RequireLevel::Fix
+        };
+        if self.conventional.clone().unwrap().commits_by_type(FEATURE) > 0 {
+            level_found = RequireLevel::Feature;
+        };
+        if self.breaking() {
+            level_found = RequireLevel::Feature
+        };
+
+        log::debug!(
+            "{:?} is the highest level commit found. {:?} level is required to enforce required files.",
+            &level_found,
+            &level
+        );
+        if level >= level_found {
+            let files = self.files.clone();
+            if let Some(files) = files {
+                let mut missing_files = vec![];
+
+                for required_file in files_required {
+                    if !files.contains(&required_file) {
+                        missing_files.push(required_file.clone());
+                    }
+                }
+
+                if !missing_files.is_empty() {
+                    return Err(Error::MissingRequiredFile(missing_files));
+                }
+            } else {
+                return Err(Error::NoFilesListed);
+            }
+        }
+
+        Ok(self)
     }
 }

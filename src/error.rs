@@ -1,5 +1,7 @@
 //! Error types for nextsv
 
+use std::ffi::OsString;
+
 use thiserror::Error;
 
 /// The error type for nextsv.
@@ -25,6 +27,15 @@ pub enum Error {
     /// The first production release (1.0.0) has already been made
     #[error("First production release already deployed. Current major version: {0}")]
     MajorAlreadyUsed(String),
+    /// No conventional commits in the VersionCalculator struct
+    #[error("No conventional commits have been loaded into the VersionCalculator struct. May have been called before `commits`.")]
+    NoConventionalCommits,
+    /// Missing required file found.
+    #[error("Missing the required file(s): {0:?}.")]
+    MissingRequiredFile(Vec<OsString>),
+    /// List of files has not been generated yet (or there are no commits). Call `commits` to generate the list by walking back to the current version tag.
+    #[error("No files have been listed. May have been called before `commits`.")]
+    NoFilesListed,
     /// Error passed up from git2
     #[error("0:?")]
     Git2(#[from] git2::Error),

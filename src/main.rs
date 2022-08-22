@@ -100,7 +100,7 @@ fn calculate(
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
-    latest_version = latest_version.commits()?;
+    latest_version = latest_version.walk_commits()?;
     if let Some(f) = files {
         latest_version.has_required(f)?;
     }

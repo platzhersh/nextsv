@@ -7,7 +7,11 @@
 //!
 //!
 
+const FEATURE: &str = "feat";
+const FIX: &str = "fix";
+
 use crate::{ConventionalCommits, Error, Level, Semantic};
+use clap::ValueEnum;
 use git2::Repository;
 use std::{collections::HashSet, ffi::OsString, fmt};
 
@@ -68,6 +72,36 @@ impl fmt::Display for ForceLevel {
     }
 }
 
+/// The options for choosing the level of a forced file requirement
+///
+/// The enum is used by the has_required method to define the level
+/// at which the the required files are enforced.
+///
+#[derive(Debug, PartialEq, PartialOrd, Clone, ValueEnum)]
+pub enum RequireLevel {
+    /// enforce requirements for breaking only
+    Breaking = 0,
+    /// enforce requirements for features and breaking
+    Feature = 1,
+    /// enforce requirements for fix, feature and breaking
+    Fix = 2,
+    /// enforce requirements for all types
+    Other = 3,
+}
+
+impl std::str::FromStr for RequireLevel {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "breaking" => Ok(RequireLevel::Breaking),
+            "feature" => Ok(RequireLevel::Feature),
+            "fix" => Ok(RequireLevel::Fix),
+            "other" => Ok(RequireLevel::Other),
+            _ => Err(Error::NoVersionTag),
+        }
+    }
+}
 /// VersionCalculator
 ///
 /// Builds up data about the current version to calculate the next version
@@ -247,7 +281,7 @@ impl VersionCalculator {
                 }
             } else if 0 < conventional.commits_by_type("feat") {
                 log::debug!(
-                    "{} feature commit(s) found requiring increment of minor  number",
+                    "{} feature commit(s) found requiring increment of minor number",
                     &conventional.commits_by_type("feat")
                 );
                 next_version.increment_minor();
@@ -292,22 +326,47 @@ impl VersionCalculator {
     ///
     /// Report error if one of the files are not found.
     /// Exits on the first failure.
-    pub fn has_required(&mut self, files_required: Vec<OsString>) -> Result<&mut Self, Error> {
-        let files = self.files.clone();
-        if let Some(files) = files {
-            let mut missing_files = vec![];
+    pub fn has_required(
+        &mut self,
+        files_required: Vec<OsString>,
+        level: RequireLevel,
+    ) -> Result<&mut Self, Error> {
+        // How to use level to ensure that the rule is only applied
+        // when required levels of commits are included
 
-            for required_file in files_required {
-                if !files.contains(&required_file) {
-                    missing_files.push(required_file.clone());
+        let mut level_found = RequireLevel::Other;
+        if self.conventional.clone().unwrap().commits_by_type(FIX) > 0 {
+            level_found = RequireLevel::Fix
+        };
+        if self.conventional.clone().unwrap().commits_by_type(FEATURE) > 0 {
+            level_found = RequireLevel::Feature;
+        };
+        if self.breaking() {
+            level_found = RequireLevel::Feature
+        };
+
+        log::debug!(
+            "{:?} is the highest level commit found. {:?} level is required to enforce required files.",
+            &level_found,
+            &level
+        );
+        if level >= level_found {
+            let files = self.files.clone();
+            if let Some(files) = files {
+                let mut missing_files = vec![];
+
+                for required_file in files_required {
+                    if !files.contains(&required_file) {
+                        missing_files.push(required_file.clone());
+                    }
                 }
-            }
 
-            if !missing_files.is_empty() {
-                return Err(Error::MissingRequiredFile(missing_files));
+                if !missing_files.is_empty() {
+                    return Err(Error::MissingRequiredFile(missing_files));
+                }
+            } else {
+                return Err(Error::NoFilesListed);
             }
-        } else {
-            return Err(Error::NoFilesListed);
         }
 
         Ok(self)

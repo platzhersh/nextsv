@@ -2,7 +2,7 @@ use std::ffi::OsString;
 use std::fmt;
 
 use clap::{Parser, ValueEnum};
-use nextsv::{Error, ForceLevel, VersionCalculator};
+use nextsv::{Error, ForceLevel, RequireLevel, VersionCalculator};
 
 const EXIT_NOT_CREATED_CODE: i32 = 1;
 const EXIT_NOT_CALCULATED_CODE: i32 = 2;
@@ -46,6 +46,9 @@ struct Cli {
     /// Require changes to these file before building release
     #[clap(short, long, multiple_values = true)]
     require: Vec<OsString>,
+    /// Level at which required files should be enforced
+    #[clap(long, arg_enum, default_value = "feature")]
+    require_level: RequireLevel,
 }
 
 fn main() {
@@ -78,7 +81,14 @@ fn main() {
         Option::Some(args.require)
     };
 
-    match calculate(latest_version, args.force, args.level, args.number, files) {
+    match calculate(
+        latest_version,
+        args.force,
+        args.level,
+        args.number,
+        files,
+        args.require_level,
+    ) {
         Ok(_) => {}
         Err(e) => {
             log::error!("{}", &e.to_string());
@@ -97,13 +107,14 @@ fn calculate(
     level: bool,
     number: bool,
     files: Option<Vec<OsString>>,
+    require_level: RequireLevel,
 ) -> Result<(), Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
     latest_version = latest_version.walk_commits()?;
     if let Some(f) = files {
-        latest_version.has_required(f)?;
+        latest_version.has_required(f, require_level)?;
     }
     let (next_version, bump) = if let Some(svc) = force {
         match svc {

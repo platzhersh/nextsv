@@ -202,13 +202,14 @@ impl VersionCalculator {
         // Walk back through the commits
         let mut files = vec![];
         for commit in revwalk.flatten() {
-            // Get the summary for the conventional comits vec
+            // Get the summary for the conventional commits vec
             log::trace!("commit found: {}", &commit.summary().unwrap_or_default());
             conventional_commits.push(&commit);
             // Get the files for the files vec
             let tree = commit.tree()?;
             tree.walk(TreeWalkMode::PreOrder, |_, entry| {
                 if let Some(file) = entry.name() {
+                    log::trace!("file found: {}", file);
                     files.push(file.to_string())
                 };
                 TreeWalkResult::Ok

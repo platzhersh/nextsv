@@ -8,8 +8,8 @@
 //!
 
 use crate::{ConventionalCommits, Error, Level, Semantic};
-use git2::{Diff, DiffOptions, Repository, TreeWalkMode, TreeWalkResult};
-use std::{ffi::OsString, fmt};
+use git2::Repository;
+use std::{collections::HashSet, ffi::OsString, fmt};
 
 /// The latest semantic version tag (vx.y.z)
 ///
@@ -77,7 +77,7 @@ impl fmt::Display for ForceLevel {
 pub struct VersionCalculator {
     current_version: Semantic,
     conventional: Option<ConventionalCommits>,
-    files: Option<Vec<OsString>>,
+    files: Option<HashSet<OsString>>,
 }
 
 impl VersionCalculator {
@@ -200,7 +200,7 @@ impl VersionCalculator {
         let mut conventional_commits = ConventionalCommits::new();
 
         // Walk back through the commits
-        let mut files = vec![];
+        let mut files = HashSet::new();
         for commit in revwalk.flatten() {
             // Get the summary for the conventional commits vec
             log::trace!("commit found: {}", &commit.summary().unwrap_or_default());
@@ -210,16 +210,16 @@ impl VersionCalculator {
             let diff = repo.diff_tree_to_workdir(Some(&tree), None).unwrap();
 
             diff.print(git2::DiffFormat::NameOnly, |delta, _hunk, _line| {
-                log::debug!("number of files: {}", delta.nfiles());
                 let file = delta.new_file().path().unwrap().file_name().unwrap();
                 log::trace!("file found: {:?}", file);
-                files.push(file.to_os_string());
+                files.insert(file.to_os_string());
                 true
             })
             .unwrap();
         }
 
         self.conventional = Some(conventional_commits);
+        log::debug!("Files found: {:#?}", &files);
         self.files = Some(files);
 
         Ok(self)

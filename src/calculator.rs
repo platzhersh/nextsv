@@ -8,7 +8,7 @@
 //!
 
 use crate::{ConventionalCommits, Error, Level, Semantic};
-use git2::Repository;
+use git2::{Repository, TreeWalkMode, TreeWalkResult};
 use std::fmt;
 
 /// The latest semantic version tag (vx.y.z)
@@ -169,7 +169,7 @@ impl VersionCalculator {
     ///
     /// Errors from 'git2' are returned.
     ///
-    pub fn commits(mut self) -> Result<Self, Error> {
+    pub fn walk_commits(mut self) -> Result<Self, Error> {
         let repo = git2::Repository::open(".")?;
         log::debug!("repo opened to find conventional commits");
         let mut revwalk = repo.revwalk()?;
@@ -199,15 +199,25 @@ impl VersionCalculator {
 
         let mut conventional_commits = ConventionalCommits::new();
 
-        for commit in revwalk {
-            // TODO: Better handling of this error as the first error
-            // encountered will abandon the entire function - is this necessary?
-            let commit = commit?;
+        // Walk back through the commits
+        let mut files = vec![];
+        for commit in revwalk.flatten() {
+            // Get the summary for the conventional comits vec
             log::trace!("commit found: {}", &commit.summary().unwrap_or_default());
             conventional_commits.push(&commit);
+            // Get the files for the files vec
+            let tree = commit.tree()?;
+            tree.walk(TreeWalkMode::PreOrder, |_, entry| {
+                if let Some(file) = entry.name() {
+                    files.push(file.to_string())
+                };
+                TreeWalkResult::Ok
+            })
+            .unwrap();
         }
 
         self.conventional = Some(conventional_commits);
+        self.files = Some(files);
 
         Ok(self)
     }

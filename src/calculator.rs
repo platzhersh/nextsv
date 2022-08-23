@@ -77,7 +77,7 @@ impl fmt::Display for ForceLevel {
 /// The enum is used by the has_required method to define the level
 /// at which the the required files are enforced.
 ///
-#[derive(Debug, PartialEq, PartialOrd, Clone, ValueEnum)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Clone, ValueEnum)]
 pub enum RequireLevel {
     /// enforce requirements for breaking only
     Breaking = 0,

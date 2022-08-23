@@ -78,7 +78,7 @@ impl fmt::Display for ForceLevel {
 /// at which the the required files are enforced.
 ///
 #[derive(Debug, PartialEq, Eq, PartialOrd, Clone, ValueEnum)]
-pub enum RequireLevel {
+pub enum EnforceLevel {
     /// enforce requirements for breaking only
     Breaking = 0,
     /// enforce requirements for features and breaking
@@ -89,15 +89,15 @@ pub enum RequireLevel {
     Other = 3,
 }
 
-impl std::str::FromStr for RequireLevel {
+impl std::str::FromStr for EnforceLevel {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            "breaking" => Ok(RequireLevel::Breaking),
-            "feature" => Ok(RequireLevel::Feature),
-            "fix" => Ok(RequireLevel::Fix),
-            "other" => Ok(RequireLevel::Other),
+            "breaking" => Ok(EnforceLevel::Breaking),
+            "feature" => Ok(EnforceLevel::Feature),
+            "fix" => Ok(EnforceLevel::Fix),
+            "other" => Ok(EnforceLevel::Other),
             _ => Err(Error::NoVersionTag),
         }
     }
@@ -329,20 +329,20 @@ impl VersionCalculator {
     pub fn has_required(
         &mut self,
         files_required: Vec<OsString>,
-        level: RequireLevel,
+        level: EnforceLevel,
     ) -> Result<&mut Self, Error> {
         // How to use level to ensure that the rule is only applied
         // when required levels of commits are included
 
-        let mut level_found = RequireLevel::Other;
+        let mut level_found = EnforceLevel::Other;
         if self.conventional.clone().unwrap().commits_by_type(FIX) > 0 {
-            level_found = RequireLevel::Fix
+            level_found = EnforceLevel::Fix
         };
         if self.conventional.clone().unwrap().commits_by_type(FEATURE) > 0 {
-            level_found = RequireLevel::Feature;
+            level_found = EnforceLevel::Feature;
         };
         if self.breaking() {
-            level_found = RequireLevel::Feature
+            level_found = EnforceLevel::Feature
         };
 
         log::debug!(

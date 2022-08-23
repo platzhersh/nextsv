@@ -40,7 +40,7 @@ mod conventional;
 mod error;
 mod semantic;
 
-pub use calculator::{ForceLevel, RequireLevel, VersionCalculator};
+pub use calculator::{EnforceLevel, ForceLevel, VersionCalculator};
 pub(crate) use conventional::ConventionalCommits;
 pub use error::Error;
 pub use semantic::{Level, Semantic};

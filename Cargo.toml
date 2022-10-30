@@ -18,7 +18,7 @@ include = [
 ]
 
 [dependencies]
-clap = { version = "3.2.23", features = ["derive"] }
+clap = { version = "4.0.18", features = ["derive"] }
 env_logger = "0.9.1"
 git-conventional = "0.12.0"
 git2 = "0.15.0"

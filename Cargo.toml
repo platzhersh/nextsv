@@ -9,16 +9,11 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/jerusdp/nextsv"
 keywords = ["semantic", "version", "calculator"]
-include = [
-    "**/*.rs",
-    "Cargo.toml",
-    "README.md",
-    "LICENSE",
-    "CHANGES.md",
-]
+include = ["**/*.rs", "Cargo.toml", "README.md", "LICENSE", "CHANGES.md"]
 
 [dependencies]
-clap = { version = "3.2.23", features = ["derive"] }
+clap = { version = "4.0.18", features = ["derive"] }
+clap-verbosity-flag = "2.0.0"
 env_logger = "0.9.1"
 git-conventional = "0.12.0"
 git2 = "0.15.0"

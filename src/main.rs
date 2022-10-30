@@ -32,19 +32,19 @@ struct Cli {
     #[clap(flatten)]
     logging: clap_verbosity_flag::Verbosity,
     /// Force the calculation of the version number
-    #[clap(short, long, value_enum)]
+    #[arg(short, long, value_enum)]
     force: Option<ForceOptions>,
     /// Prefix string to identify version number tags
-    #[clap(short, long, value_parser, default_value = "v")]
+    #[arg(short, long, value_parser, default_value = "v")]
     prefix: String,
     /// Report the level of the version number change
-    #[clap(long)]
+    #[arg(long)]
     level: bool,
     /// Report the version number
-    #[clap(long)]
+    #[arg(long)]
     number: bool,
     /// Require changes to these file before building release
-    #[clap(short, long)]
+    #[arg(short, long)]
     require: Vec<OsString>,
     /// Level at which required files should be enforced
     #[clap(short, long, default_value = "feature")]

@@ -1,0 +1,66 @@
+```console
+$ nextsv --help
+nextsv 0.7.0
+jerusdp <jrussell@jerus.ie>
+Next semantic version calculator
+
+USAGE:
+    nextsv [OPTIONS]
+
+OPTIONS:
+    -e, --enforce-level <ENFORCE_LEVEL>
+            Level at which required files should be enforced
+            
+            [default: feature]
+            [possible values: breaking, feature, fix, other]
+
+    -f, --force <FORCE>
+            Force the calculation of the version number
+            
+            [possible values: major, minor, patch, first]
+
+    -h, --help
+            Print help information
+
+        --level
+            Report the level of the version number change
+
+        --number
+            Report the version number
+
+    -p, --prefix <PREFIX>
+            Prefix string to identify version number tags
+            
+            [default: v]
+
+    -q, --quiet
+            Pass many times for less log output
+
+    -r, --require <REQUIRE>...
+            Require changes to these file before building release
+
+    -v, --verbose
+            Pass many times for more log output
+            
+            By default, it'll report info. Passing `-v` one time adds debug logs, `-vv` adds trace
+            logs.
+
+    -V, --version
+            Print version information
+
+```
+
+# Required changes
+
+```console
+$ nextsv -r README.md CHANGES.md CHANGELOG.md
+[[..] INFO  nextsv] Calculating the next version level
+patch
+
+```
+
+```console
+$ nextsv -q
+patch
+
+```

@@ -9,13 +9,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/jerusdp/nextsv"
 keywords = ["semantic", "version", "calculator"]
-include = [
-    "**/*.rs",
-    "Cargo.toml",
-    "README.md",
-    "LICENSE",
-    "CHANGES.md",
-]
+include = ["**/*.rs", "Cargo.toml", "README.md", "LICENSE", "CHANGES.md"]
 
 [dependencies]
 clap = { version = "3.2.14", features = ["derive"] }
@@ -27,6 +21,7 @@ thiserror = "1.0"
 
 [dev-dependencies]
 claim = "0.5"
+trycmd = "0.14.1"
 
 [lib]
 name = "nextsv"

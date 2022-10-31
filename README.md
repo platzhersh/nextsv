@@ -49,8 +49,7 @@ cargo install nextsv
 
 Run in your project directory and check the version
 
-```sh
-
+```console
 $ nextsv --version
 nextsv 0.7.0
 

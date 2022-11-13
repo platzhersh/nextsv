@@ -356,8 +356,8 @@ impl VersionCalculator {
                 let mut missing_files = vec![];
 
                 for file in files_required {
-                    if !files.contains(&required_file) {
-                        missing_files.push(required_file.clone());
+                    if !files.contains(&file) {
+                        missing_files.push(file.clone());
                     }
                 }
 

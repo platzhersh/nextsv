@@ -53,9 +53,10 @@ OPTIONS:
 # Required changes
 
 ```console
-$ nextsv -r README.md CHANGES.md CHANGELOG.md
+$ nextsv -r README.md CHANGES.md CHANGELOG.md TEST.md
+? 3
 [[..] INFO  nextsv] Calculating the next version level
-patch
+[[..] ERROR nextsv] Missing the required file(s): ["CHANGES.md", "CHANGELOG.md", "TEST.md"].
 
 ```
 

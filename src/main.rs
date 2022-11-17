@@ -30,31 +30,31 @@ impl fmt::Display for ForceOptions {
 #[clap(author, version, about, long_about = None)]
 struct Cli {
     #[clap(flatten)]
-    logging: Verbosity,
+    logging: clap_verbosity_flag::Verbosity,
     /// Force the calculation of the version number
-    #[clap(short, long, value_enum)]
+    #[arg(short, long, value_enum)]
     force: Option<ForceOptions>,
     /// Prefix string to identify version number tags
-    #[clap(short, long, value_parser, default_value = "v")]
+    #[arg(short, long, value_parser, default_value = "v")]
     prefix: String,
     /// Report the level of the version number change
-    #[clap(long)]
+    #[arg(long)]
     level: bool,
     /// Report the version number
-    #[clap(long)]
+    #[arg(long)]
     number: bool,
     /// Require changes to these file before building release
-    #[clap(short, long, multiple_values = true)]
+    #[arg(short, long)]
     require: Vec<OsString>,
     /// Level at which required files should be enforced
-    #[clap(short, long, arg_enum, default_value = "feature")]
+    #[clap(short, long, default_value = "feature")]
     enforce_level: EnforceLevel,
 }
 
 fn main() {
     let args = Cli::parse();
 
-    let mut builder = get_logging(args.logging.log_level());
+    let mut builder = get_logging(args.logging.log_level_filter());
     builder.init();
 
     match (args.number, args.level) {
@@ -139,41 +139,12 @@ fn calculate(
     Ok(())
 }
 
-pub fn get_logging(level: log::Level) -> env_logger::Builder {
+pub fn get_logging(level: log::LevelFilter) -> env_logger::Builder {
     let mut builder = env_logger::Builder::new();
 
-    builder.filter(None, level.to_level_filter());
+    builder.filter(None, level);
 
     builder.format_timestamp_secs().format_module_path(false);
 
     builder
-}
-
-#[derive(clap::Args, Debug, Clone)]
-pub struct Verbosity {
-    /// Pass many times for less log output
-    #[clap(long, short, parse(from_occurrences))]
-    quiet: i8,
-
-    /// Pass many times for more log output
-    ///
-    /// By default, it'll report info. Passing `-v` one time adds debug
-    /// logs, `-vv` adds trace logs.
-    #[clap(long, short, parse(from_occurrences))]
-    verbose: i8,
-}
-
-impl Verbosity {
-    /// Get the log level.
-    pub fn log_level(&self) -> log::Level {
-        let verbosity = 2 - self.quiet + self.verbose;
-
-        match verbosity {
-            i8::MIN..=0 => log::Level::Error,
-            1 => log::Level::Warn,
-            2 => log::Level::Info,
-            3 => log::Level::Debug,
-            4..=i8::MAX => log::Level::Trace,
-        }
-    }
 }

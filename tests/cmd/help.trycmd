@@ -1,62 +1,60 @@
 ```console
 $ nextsv --help
-nextsv 0.7.0
-jerusdp <jrussell@jerus.ie>
 Next semantic version calculator
 
-USAGE:
-    nextsv [OPTIONS]
+Usage: nextsv [OPTIONS]
 
-OPTIONS:
-    -e, --enforce-level <ENFORCE_LEVEL>
-            Level at which required files should be enforced
-            
-            [default: feature]
-            [possible values: breaking, feature, fix, other]
+Options:
+  -v, --verbose...
+          More output per occurrence
 
-    -f, --force <FORCE>
-            Force the calculation of the version number
-            
-            [possible values: major, minor, patch, first]
+  -q, --quiet...
+          Less output per occurrence
 
-    -h, --help
-            Print help information
+  -f, --force <FORCE>
+          Force the calculation of the version number
+          
+          [possible values: major, minor, patch, first]
 
-        --level
-            Report the level of the version number change
+  -p, --prefix <PREFIX>
+          Prefix string to identify version number tags
+          
+          [default: v]
 
-        --number
-            Report the version number
+      --level
+          Report the level of the version number change
 
-    -p, --prefix <PREFIX>
-            Prefix string to identify version number tags
-            
-            [default: v]
+      --number
+          Report the version number
 
-    -q, --quiet
-            Pass many times for less log output
+  -r, --require <REQUIRE>
+          Require changes to these file before building release
 
-    -r, --require <REQUIRE>...
-            Require changes to these file before building release
+  -e, --enforce-level <ENFORCE_LEVEL>
+          Level at which required files should be enforced
+          
+          [default: feature]
 
-    -v, --verbose
-            Pass many times for more log output
-            
-            By default, it'll report info. Passing `-v` one time adds debug logs, `-vv` adds trace
-            logs.
+          Possible values:
+          - breaking: enforce requirements for breaking only
+          - feature:  enforce requirements for features and breaking
+          - fix:      enforce requirements for fix, feature and breaking
+          - other:    enforce requirements for all types
 
-    -V, --version
-            Print version information
+  -h, --help
+          Print help information (use `-h` for a summary)
+
+  -V, --version
+          Print version information
 
 ```
 
 # Required changes
 
 ```console
-$ nextsv -r README.md CHANGES.md CHANGELOG.md TEST.md
+$ nextsv -r README.md -r CHANGES.md -r CHANGELOG.md -r INVENTED.md
 ? 3
-[[..] INFO  nextsv] Calculating the next version level
-[[..] ERROR nextsv] Missing the required file(s): ["CHANGES.md", "CHANGELOG.md", "TEST.md"].
+[[..] ERROR nextsv] Missing the required file(s): [[..]"INVENTED.md"].
 
 ```
 

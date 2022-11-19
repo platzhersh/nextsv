@@ -16,6 +16,7 @@
         "calculator",
         "cli",
         "cargo",
-        "crate"
+        "crate",
+        "cmdline"
     ]
 }

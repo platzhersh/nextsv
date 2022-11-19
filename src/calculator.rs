@@ -350,14 +350,14 @@ impl VersionCalculator {
             &level_found,
             &level
         );
-        if level >= level_found {
+        if level_found >= level {
             let files = self.files.clone();
             if let Some(files) = files {
                 let mut missing_files = vec![];
 
-                for required_file in files_required {
-                    if !files.contains(&required_file) {
-                        missing_files.push(required_file.clone());
+                for file in files_required {
+                    if !files.contains(&file) {
+                        missing_files.push(file.clone());
                     }
                 }
 

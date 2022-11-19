@@ -1,0 +1,65 @@
+```console
+$ nextsv --help
+Next semantic version calculator
+
+Usage: nextsv [OPTIONS]
+
+Options:
+  -v, --verbose...
+          More output per occurrence
+
+  -q, --quiet...
+          Less output per occurrence
+
+  -f, --force <FORCE>
+          Force the calculation of the version number
+          
+          [possible values: major, minor, patch, first]
+
+  -p, --prefix <PREFIX>
+          Prefix string to identify version number tags
+          
+          [default: v]
+
+      --level
+          Report the level of the version number change
+
+      --number
+          Report the version number
+
+  -r, --require <REQUIRE>
+          Require changes to these file before building release
+
+  -e, --enforce-level <ENFORCE_LEVEL>
+          Level at which required files should be enforced
+          
+          [default: feature]
+
+          Possible values:
+          - breaking: enforce requirements for breaking only
+          - feature:  enforce requirements for features and breaking
+          - fix:      enforce requirements for fix, feature and breaking
+          - other:    enforce requirements for all types
+
+  -h, --help
+          Print help information (use `-h` for a summary)
+
+  -V, --version
+          Print version information
+
+```
+
+# Required changes
+
+```console
+$ nextsv -r README.md -r CHANGES.md -r CHANGELOG.md -r INVENTED.md
+? 3
+[[..] ERROR nextsv] Missing the required file(s): [[..]"INVENTED.md"].
+
+```
+
+```console
+$ nextsv -q
+patch
+
+```

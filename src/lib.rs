@@ -17,7 +17,7 @@
 //! ```toml
 //!
 //! [dependencies]
-//! nextsv = "0.7.2"
+//! nextsv = "0.7.3"
 //!
 //! ```
 //!

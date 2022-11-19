@@ -30,12 +30,12 @@ A utility to calculate the level of change and the next semantic version number 
 
 ## Feature set
 
-[x] Calculate next semantic version number
-[x] Calculate the level to change for next semantic version number
-[x] Support basic semantic version components: Major, Minor, and Patch
-[ ] Support pre-release versions (alpha, beta, rc)
-[ ] Handle case where no tag is found
-[ ] Update to release version (removing pre-release identifiers)
+- [x] Calculate next semantic version number
+- [x] Calculate the level to change for next semantic version number
+- [x] Support basic semantic version components: Major, Minor, and Patch
+- [ ] Support pre-release versions (alpha, beta, rc)
+- [ ] Handle case where no tag is found
+- [ ] Update to release version (removing pre-release identifiers)
 
 ## CLI Usage
 

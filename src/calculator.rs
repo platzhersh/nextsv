@@ -262,43 +262,43 @@ impl VersionCalculator {
     /// Calculate the next version and report the version number
     /// and level at which the change is made.
     pub fn next_version(&mut self) -> (Semantic, Level) {
-        // clone the current version to mutate for the next version
-        let mut next_version = self.current_version.clone();
-        let mut bump = Level::None;
-
         // check the conventional commits. No conventional commits; no change.
-        if let Some(conventional) = self.conventional.clone() {
+        let Some(conventional) = self.conventional.clone() else {
+            return (self.current_version.clone(), Level::None)
+        };
+        let bump = if conventional.breaking() {
             // Breaking change found in commits
-            if conventional.breaking() {
-                log::debug!("breaking change found");
-                if next_version.major() == 0 {
-                    log::warn!("Not yet at a stable version");
-                    next_version.increment_minor();
-                    bump = Level::Minor;
-                } else {
-                    next_version.increment_major();
-                    bump = Level::Major;
-                }
-            } else if 0 < conventional.commits_by_type("feat") {
-                log::debug!(
-                    "{} feature commit(s) found requiring increment of minor number",
-                    &conventional.commits_by_type("feat")
-                );
-                next_version.increment_minor();
-                bump = Level::Minor;
-            } else if 0 < conventional.commits_all_types() {
-                log::debug!(
-                    "{} conventional commit(s) found requiring increment of patch number",
-                    &conventional.commits_all_types()
-                );
-                next_version.increment_patch();
-                bump = Level::Patch;
-            } else {
-                bump = Level::None;
-            }
-        }
+            log::debug!("breaking change found");
+            Level::Major
+        } else if 0 < conventional.commits_by_type("feat") {
+            log::debug!(
+                "{} feature commit(s) found requiring increment of minor number",
+                &conventional.commits_by_type("feat")
+            );
+            Level::Minor
+        } else if 0 < conventional.commits_all_types() {
+            log::debug!(
+                "{} conventional commit(s) found requiring increment of patch number",
+                &conventional.commits_all_types()
+            );
+            Level::Patch
+        } else {
+            Level::None
+        };
 
-        (next_version, bump)
+        let final_bump = if self.current_version.major() == 0 {
+            log::warn!("Not yet at a stable version");
+            match bump {
+                Level::Major => Level::Minor,
+                Level::Minor => Level::Patch,
+                _ => bump,
+            }
+        } else {
+            bump
+        };
+        let next_version = next_version_calculator(self.current_version.clone(), &final_bump);
+
+        (next_version, final_bump)
     }
 
     /// Report version 1.0.0 and update level major
@@ -370,5 +370,14 @@ impl VersionCalculator {
         }
 
         Ok(self)
+    }
+}
+
+fn next_version_calculator(mut version: Semantic, bump: &Level) -> Semantic {
+    match *bump {
+        Level::Major => version.increment_major().clone(),
+        Level::Minor => version.increment_minor().clone(),
+        Level::Patch => version.increment_patch().clone(),
+        _ => version,
     }
 }

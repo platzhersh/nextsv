@@ -22,7 +22,7 @@ thiserror = "1.0"
 
 [dev-dependencies]
 claims = "0.7"
-trycmd = "0.14.4"
+trycmd = "0.14.5"
 
 [lib]
 name = "nextsv"

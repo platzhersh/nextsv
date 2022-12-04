@@ -266,7 +266,7 @@ mod tests {
         let version_prefix = "v";
         let semantic = Semantic::parse(tag, version_prefix);
 
-        claim::assert_ok!(&semantic);
+        claims::assert_ok!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -280,7 +280,7 @@ mod tests {
         let version_prefix = "Release Version ";
         let semantic = Semantic::parse(tag, version_prefix);
 
-        claim::assert_ok!(&semantic);
+        claims::assert_ok!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -294,7 +294,7 @@ mod tests {
         let version_prefix = "v";
         let semantic = Semantic::parse(tag, version_prefix);
 
-        claim::assert_err!(&semantic);
+        claims::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -311,7 +311,7 @@ mod tests {
         let version_prefix = "v";
         let semantic = Semantic::parse(tag, version_prefix);
 
-        claim::assert_err!(&semantic);
+        claims::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -328,7 +328,7 @@ mod tests {
         let version_prefix = "v";
         let semantic = Semantic::parse(tag, version_prefix);
 
-        claim::assert_err!(&semantic);
+        claims::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),
@@ -345,7 +345,7 @@ mod tests {
         let version_prefix = "v";
         let semantic = Semantic::parse(tag, version_prefix);
 
-        claim::assert_err!(&semantic);
+        claims::assert_err!(&semantic);
         let semantic = match semantic {
             Ok(s) => s.to_string(),
             Err(e) => e.to_string(),

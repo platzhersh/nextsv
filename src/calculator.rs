@@ -263,9 +263,16 @@ impl VersionCalculator {
     /// and level at which the change is made.
     pub fn next_version(&mut self) -> (Semantic, Level) {
         // check the conventional commits. No conventional commits; no change.
+        #[cfg(let_else)]
         let Some(conventional) = self.conventional.clone() else {
             return (self.current_version.clone(), Level::None)
         };
+        #[cfg(not(let_else))]
+        let conventional = match self.conventional.clone() {
+            Some(c) => c,
+            None => return (self.current_version.clone(), Level::None),
+        };
+
         let bump = if conventional.breaking() {
             // Breaking change found in commits
             log::debug!("breaking change found");

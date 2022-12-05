@@ -80,13 +80,13 @@ impl fmt::Display for ForceLevel {
 #[derive(Debug, PartialEq, Eq, PartialOrd, Clone, ValueEnum)]
 pub enum EnforceLevel {
     /// enforce requirements for breaking only
-    Breaking = 0,
+    Breaking = 4,
     /// enforce requirements for features and breaking
-    Feature = 1,
+    Feature = 3,
     /// enforce requirements for fix, feature and breaking
     Fix = 2,
     /// enforce requirements for all types
-    Other = 3,
+    Other = 1,
 }
 
 impl std::str::FromStr for EnforceLevel {

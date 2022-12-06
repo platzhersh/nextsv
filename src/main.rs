@@ -55,7 +55,7 @@ struct Cli {
     /// meets a minimum before applying an update. The program
     /// exits with an error of the threshold is not met.
     #[clap(short, long, default_value = "other")]
-    check: EnforceLevel,
+    check: Option<EnforceLevel>,
 }
 
 fn main() {

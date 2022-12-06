@@ -49,6 +49,13 @@ struct Cli {
     /// Level at which required files should be enforced
     #[clap(short, long, default_value = "feature")]
     enforce_level: EnforceLevel,
+    /// Check level meets minimum for setting
+    ///
+    /// This option can be used to check the calculated level
+    /// meets a minimum before applying an update. The program
+    /// exits with an error of the threshold is not met.
+    #[clap(short, long, default_value = "other")]
+    check: EnforceLevel,
 }
 
 fn main() {

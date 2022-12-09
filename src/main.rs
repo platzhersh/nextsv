@@ -96,7 +96,9 @@ fn main() {
         files,
         args.enforce_level,
     ) {
-        Ok(_) => {}
+        Ok(output) => {
+            println!("{output}")
+        }
         Err(e) => {
             log::error!("{}", &e.to_string());
             if let Error::MissingRequiredFile(f) = e {
@@ -115,7 +117,7 @@ fn calculate(
     number: bool,
     files: Option<Vec<OsString>>,
     require_level: EnforceLevel,
-) -> Result<(), Error> {
+) -> Result<String, Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
@@ -134,16 +136,12 @@ fn calculate(
         latest_version.next_version()
     };
 
-    match (number, level) {
-        (false, false) => println!("{}", bump),
-        (false, true) => println!("{}", bump),
-        (true, false) => println!("{}", next_version),
-        (true, true) => {
-            println!("{}", next_version);
-            println!("{}", bump);
-        }
-    }
-    Ok(())
+    Ok(match (number, level) {
+        (false, false) => format!("{bump}"),
+        (false, true) => format!("{bump}"),
+        (true, false) => format!("{next_version}"),
+        (true, true) => format!("{next_version}\n{bump}"),
+    })
 }
 
 pub fn get_logging(level: log::LevelFilter) -> env_logger::Builder {

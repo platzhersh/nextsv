@@ -294,7 +294,7 @@ impl VersionCalculator {
         };
 
         let final_bump = if self.current_version.major() == 0 {
-            log::warn!("Not yet at a stable version");
+            log::info!("Not yet at a stable version");
             match bump {
                 Level::Major => Level::Minor,
                 Level::Minor => Level::Patch,

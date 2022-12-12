@@ -33,6 +33,9 @@ pub enum Error {
     /// Missing required file found.
     #[error("Missing the required file(s): {0:?}.")]
     MissingRequiredFile(Vec<OsString>),
+    /// Not a valid Type Hierachy name.
+    #[error("{0} is not a valid type hierarchy namne.")]
+    NotTypeHierachyName(String),
     /// List of files has not been generated yet (or there are no commits). Call `commits` to generate the list by walking back to the current version tag.
     #[error("No files have been listed. May have been called before `commits`.")]
     NoFilesListed,

@@ -2,11 +2,14 @@ use std::ffi::OsString;
 use std::fmt;
 
 use clap::{Parser, ValueEnum};
-use nextsv::{EnforceLevel, Error, ForceLevel, VersionCalculator};
+use nextsv::{Error, ForceLevel, Level, Semantic, TypeHierarchy, VersionCalculator};
 
-const EXIT_NOT_CREATED_CODE: i32 = 1;
-const EXIT_NOT_CALCULATED_CODE: i32 = 2;
-const EXIT_MISSING_REQUIRED_CODE: i32 = 3;
+const EXIT_SUCCESS: i32 = 0;
+// const EXIT_UNEXPECTED_ERROR: i32 = 10;
+const EXIT_NOT_CREATED_CODE: i32 = 11;
+const EXIT_NOT_CALCULATED_CODE: i32 = 12;
+const EXIT_MISSING_REQUIRED_CODE: i32 = 13;
+const EXIT_NOT_REQUIRED_LEVEL: i32 = 14;
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -48,14 +51,14 @@ struct Cli {
     require: Vec<OsString>,
     /// Level at which required files should be enforced
     #[clap(short, long, default_value = "feature")]
-    enforce_level: EnforceLevel,
+    enforce_level: TypeHierarchy,
     /// Check level meets minimum for setting
     ///
     /// This option can be used to check the calculated level
     /// meets a minimum before applying an update. The program
-    /// exits with an error of the threshold is not met.
-    #[clap(short, long, default_value = "other")]
-    check: Option<EnforceLevel>,
+    /// exits with an error if the threshold is not met.
+    #[clap(short, long)]
+    check: Option<TypeHierarchy>,
 }
 
 fn main() {
@@ -91,14 +94,30 @@ fn main() {
     match calculate(
         latest_version,
         args.force,
-        args.level,
-        args.number,
+        // args.level,
+        // args.number,
         files,
         args.enforce_level,
     ) {
-        Ok(output) => {
-            println!("{output}")
-        }
+        Ok(output) => match args.check {
+            Some(minimum_level) => {
+                log::debug!("level expected is {:?}", &minimum_level);
+                log::debug!("level reported is {:?}", &output.2,);
+                if let Some(type_level) = output.2 {
+                    if type_level >= minimum_level {
+                        log::debug!("the minimum level is met");
+                        std::process::exit(EXIT_SUCCESS)
+                    } else {
+                        log::debug!("the minimum level is not met");
+                        std::process::exit(EXIT_NOT_REQUIRED_LEVEL)
+                    };
+                }
+            }
+            None => {
+                log::debug!("not checking so print the output");
+                print_output(args.number, args.level, output.0, output.1)
+            }
+        },
         Err(e) => {
             log::error!("{}", &e.to_string());
             if let Error::MissingRequiredFile(f) = e {
@@ -107,17 +126,17 @@ fn main() {
             }
             std::process::exit(EXIT_NOT_CALCULATED_CODE)
         }
-    }
+    };
 }
 
 fn calculate(
     mut latest_version: VersionCalculator,
     force: Option<ForceOptions>,
-    level: bool,
-    number: bool,
+    // level: bool,
+    // number: bool,
     files: Option<Vec<OsString>>,
-    require_level: EnforceLevel,
-) -> Result<String, Error> {
+    require_level: TypeHierarchy,
+) -> Result<(Level, Semantic, Option<TypeHierarchy>), Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
@@ -136,12 +155,9 @@ fn calculate(
         latest_version.next_version()
     };
 
-    Ok(match (number, level) {
-        (false, false) => format!("{bump}"),
-        (false, true) => format!("{bump}"),
-        (true, false) => format!("{next_version}"),
-        (true, true) => format!("{next_version}\n{bump}"),
-    })
+    let top_level = latest_version.top_level();
+
+    Ok((bump, next_version, top_level))
 }
 
 pub fn get_logging(level: log::LevelFilter) -> env_logger::Builder {
@@ -152,4 +168,15 @@ pub fn get_logging(level: log::LevelFilter) -> env_logger::Builder {
     builder.format_timestamp_secs().format_module_path(false);
 
     builder
+}
+
+/// Print the output from the calculation
+///
+fn print_output(number: bool, level: bool, bump: Level, next_version: Semantic) {
+    match (number, level) {
+        (false, false) => println!("{bump}"),
+        (false, true) => println!("{bump}"),
+        (true, false) => println!("{next_version}"),
+        (true, true) => println!("{next_version}\n{bump}"),
+    }
 }

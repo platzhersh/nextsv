@@ -7,11 +7,7 @@
 //!
 //!
 
-const FEATURE: &str = "feat";
-const FIX: &str = "fix";
-
-use crate::{ConventionalCommits, Error, Level, Semantic};
-use clap::ValueEnum;
+use crate::{ConventionalCommits, Error, Level, Semantic, TypeHierarchy};
 use git2::Repository;
 use std::{collections::HashSet, ffi::OsString, fmt};
 
@@ -72,36 +68,6 @@ impl fmt::Display for ForceLevel {
     }
 }
 
-/// The options for choosing the level of a forced file requirement
-///
-/// The enum is used by the has_required method to define the level
-/// at which the the required files are enforced.
-///
-#[derive(Debug, PartialEq, Eq, PartialOrd, Clone, ValueEnum)]
-pub enum EnforceLevel {
-    /// enforce requirements for breaking only
-    Breaking = 4,
-    /// enforce requirements for features and breaking
-    Feature = 3,
-    /// enforce requirements for fix, feature and breaking
-    Fix = 2,
-    /// enforce requirements for all types
-    Other = 1,
-}
-
-impl std::str::FromStr for EnforceLevel {
-    type Err = Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "breaking" => Ok(EnforceLevel::Breaking),
-            "feature" => Ok(EnforceLevel::Feature),
-            "fix" => Ok(EnforceLevel::Fix),
-            "other" => Ok(EnforceLevel::Other),
-            _ => Err(Error::NoVersionTag),
-        }
-    }
-}
 /// VersionCalculator
 ///
 /// Builds up data about the current version to calculate the next version
@@ -134,6 +100,16 @@ impl VersionCalculator {
     ///
     pub fn name(&self) -> Semantic {
         self.current_version.clone()
+    }
+
+    /// Report top level
+    ///
+    pub fn top_level(&self) -> Option<TypeHierarchy> {
+        if self.conventional.is_none() {
+            None
+        } else {
+            self.conventional.clone().unwrap().top_type()
+        }
     }
 
     /// The count of commits of a type in the conventional commits field
@@ -334,30 +310,21 @@ impl VersionCalculator {
     /// Report error if one of the files are not found.
     /// Exits on the first failure.
     pub fn has_required(
-        &mut self,
+        &self,
         files_required: Vec<OsString>,
-        level: EnforceLevel,
-    ) -> Result<&mut Self, Error> {
+        level: TypeHierarchy,
+    ) -> Result<(), Error> {
         // How to use level to ensure that the rule is only applied
         // when required levels of commits are included
 
-        let mut level_found = EnforceLevel::Other;
-        if self.conventional.clone().unwrap().commits_by_type(FIX) > 0 {
-            level_found = EnforceLevel::Fix
-        };
-        if self.conventional.clone().unwrap().commits_by_type(FEATURE) > 0 {
-            level_found = EnforceLevel::Feature;
-        };
-        if self.breaking() {
-            level_found = EnforceLevel::Feature
-        };
-
-        log::debug!(
-            "{:?} is the highest level commit found. {:?} level is required to enforce required files.",
-            &level_found,
-            &level
-        );
-        if level_found >= level {
+        if self
+            .conventional
+            .as_ref()
+            .unwrap()
+            .top_type()
+            .unwrap_or_default()
+            >= level
+        {
             let files = self.files.clone();
             if let Some(files) = files {
                 let mut missing_files = vec![];
@@ -376,7 +343,7 @@ impl VersionCalculator {
             }
         }
 
-        Ok(self)
+        Ok(())
     }
 }
 

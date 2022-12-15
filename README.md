@@ -33,6 +33,9 @@ A utility to calculate the level of change and the next semantic version number 
 - [x] Calculate next semantic version number
 - [x] Calculate the level to change for next semantic version number
 - [x] Support basic semantic version components: Major, Minor, and Patch
+- [x] Check for required files (e.g. CHANGELOG.md)
+- [x] Set level of change (Breaking, Feature, Fix, Other) at which required files are required 
+- [x] Check that any changes made meet a specified level
 - [ ] Support pre-release versions (alpha, beta, rc)
 - [ ] Handle case where no tag is found
 - [ ] Update to release version (removing pre-release identifiers)

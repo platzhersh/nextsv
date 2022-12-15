@@ -8,15 +8,135 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-header -->
 
-## [Unreleased] - ReleaseDate
+## [unreleased] - ReleaseDate
+
+### Bug Fixes
+
+- Case where major is 0
+- Update rust crate clap to 4.0.29
+- Correct Enforcelevel values
+- Update rust crate env_logger to 0.10.0
+
+### Documentation
+
+- Feature set as list
+- Fix typo in comment
+
+### Features
+
+- Add check option
+
+### Miscellaneous Tasks
+
+- Update github/codeql-action action to v2.1.35
+- Build script to gate let_else
+- Update rust crate trycmd to 0.14.5
+- Update ossf/scorecard-action digest to b8b2b68
+- Update github/codeql-action digest to 62b14cb
+
+### Refactor
+
+- Make check option optional
+- Correct log level of to info
+- Return output from calculate
+- Implementation of type hierarchy checking
+
+### Testing
+
+- Fix breaking test as test incorrect
+- Update tests for trycmd
+- Align tests with code changes
+
+### Ci
+
+- Split release job into two
+- Fix release ready script
+- Debug verbosityr for nextsv
+- Use check in  CI
 
 ## [0.7.4] - 2022-11-19
 
+### Bug Fixes
+
+- Check  backwards
+- Rename of variable
+- Update rust crate clap to 4.0.26
+- Update rust crate env_logger to 0.9.3
+
+### Miscellaneous Tasks
+
+- Fix release nextsv specification
+- Update github/codeql-action digest
+- Update ossf/scorecard-action digest
+- Update actions/checkout digest
+- Update actions/upload-artifact digest to 6673cd0
+- Update ossf/scorecard-action action to v1.1.2
+- Update actions/checkout action to v3.1.0
+- Update actions/upload-artifact action to v3.1.1
+- Update github/codeql-action action to v2
+- Update rust crate trycmd to 0.14.4
+- Update ossf/scorecard-action action to v2
+- Release
+
+### Testing
+
+- Update cmd line tests as without updates the test should fail
+- Removing testing tifle
+- Correct required file check
+
 ## [0.7.3] - 2022-11-05
+
+### Bug Fixes
+
+- Update rust crate clap to 3.2.23
+- Update rust crate env_logger to 0.9.1
+- Update rust crate git2 to 0.15.0
+- Update rust crate clap to v4
+- Update rust crate clap to v4
+- Adapt to Clap 4.0
+
+### Miscellaneous Tasks
+
+- Update actions/upload-artifact digest to 83fd05a
+- Feature enable missing doc
+- Feature enable missing_doc_code_example
+- Allow unstable feature
+- Fix feature unblock by adding config
+- Update github/codeql-action digest to 40542d3
+- Update ossf/scorecard-action digest to 1455f79
+- Update actions/checkout digest to 1f9a0c2
+- Update
+- Release
+
+### Testing
+
+- Add tests for CLI expected outputs
 
 ## [0.7.2] - 2022-09-24
 
+### Miscellaneous Tasks
+
+- Release
+
 ## [0.7.1] - 2022-09-18
+
+### Bug Fixes
+
+- Clippy lint failure on not derving Eq
+
+### Miscellaneous Tasks
+
+- Tidy up the change logs
+- Update security policy
+- Preload security in unreleased
+- Spacing in change logs
+- Update nextsv calculation
+- Updeate enforce flag to -e
+- Release
+
+### Refactor
+
+- Rename require-level enforce-level
 
 ## [0.7.0] - 2022-08-22
 

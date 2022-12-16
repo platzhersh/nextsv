@@ -71,14 +71,14 @@ jobs:
           command: |
             cargo +nightly doc --lib --no-deps --all-features --document-private-items
 
-  release-ready:
-    executor: rust-env
-    steps:
-      - checkout
-      - run:
-          name: Check if ready to make a release
-          command: |
-            nextsv -vv -c fix
+  # release-ready:
+  #   executor: rust-env
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Check if ready to make a release
+  #         command: |
+  #           nextsv -vv -c fix
 
   make-release:
     executor: rust-env
@@ -102,14 +102,19 @@ jobs:
           name: Publish update
           command: |
             set -exo pipefail
-            cargo release -vvv --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
 
-  happy-ending:
-    executor: rust-env
-    steps:
-      - run:
-          name: happy ending to ensure that not being ready for a release does not mark the crate tests as failing
-          command: exit 0
+            if nextsv -vvv -c fix ; then 
+              cargo release -vvv --registry spare --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
+            else 
+              echo "Nothting to release yet."
+            fi
+
+  # happy-ending:
+  #   executor: rust-env
+  #   steps:
+  #     - run:
+  #         name: happy ending to ensure that not being ready for a release does not mark the crate tests as failing
+  #         command: exit 0
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -121,18 +126,6 @@ workflows:
     jobs:
       - required-builds
       - basic-tests
-      # - feature-test:
-      #     matrix:
-      #       parameters:
-      #         feature:
-      #           [
-      #             all,
-      #           ]
-      #     requires:
-      #       - basic-test
-      # - all-features-flag-test:
-      #     requires:
-      #       - feature-test
       - docs
       - optional-builds
   release-check:
@@ -141,9 +134,9 @@ workflows:
         - equal: [scheduled_pipeline, << pipeline.trigger_source >>]
         - equal: ["release check", << pipeline.schedule.name >>]
     jobs:
-      - release-ready
-      - make-release:
-          requires:
-            - release-ready
-      - happy-ending
+      # - release-ready
+      - make-release
+        # requires:
+        # - release-ready
+      # - happy-ending
 # VS Code Extension Version: 1.4.0

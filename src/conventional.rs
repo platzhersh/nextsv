@@ -42,23 +42,19 @@ impl TypeHierarchy {
     /// Parse a string into a TypeHierarchy mapping the types or "breaking"
     ///
     pub fn parse(s: &str) -> Result<TypeHierarchy, Error> {
-        let out;
-
-        match s.to_lowercase().as_str() {
-            "feat" => out = TypeHierarchy::Feature,
-            "fix" => out = TypeHierarchy::Fix,
-            "revert" => out = TypeHierarchy::Fix,
-            "docs" => out = TypeHierarchy::Other,
-            "style" => out = TypeHierarchy::Other,
-            "refactor" => out = TypeHierarchy::Other,
-            "perf" => out = TypeHierarchy::Other,
-            "test" => out = TypeHierarchy::Other,
-            "chore" => out = TypeHierarchy::Other,
-            "breaking" => out = TypeHierarchy::Breaking,
+        Ok(match s.to_lowercase().as_str() {
+            "feat" => TypeHierarchy::Feature,
+            "fix" => TypeHierarchy::Fix,
+            "revert" => TypeHierarchy::Fix,
+            "docs" => TypeHierarchy::Other,
+            "style" => TypeHierarchy::Other,
+            "refactor" => TypeHierarchy::Other,
+            "perf" => TypeHierarchy::Other,
+            "test" => TypeHierarchy::Other,
+            "chore" => TypeHierarchy::Other,
+            "breaking" => TypeHierarchy::Breaking,
             _ => return Err(Error::NotTypeHierachyName(s.to_string())),
-        }
-
-        Ok(out)
+        })
     }
 }
 #[derive(Default, Debug, PartialEq, Eq, Clone)]
@@ -131,19 +127,83 @@ impl ConventionalCommits {
 
     fn set_top_type_if_higher(&mut self, type_: &str) -> &mut Self {
         let th = TypeHierarchy::parse(type_);
-
-        if th.is_ok() {
-            let th = th.unwrap();
-            if self.top_type.is_none() {
-                self.top_type = Some(th)
-            } else if self.top_type.as_ref().unwrap() < &th {
+        if let Ok(th) = th {
+            #[allow(clippy::redundant_clone)]
+            if th.clone() as u32 > self.top_type_discriminant() {
                 self.top_type = Some(th)
             }
         }
+
         self
     }
 
+    /// top_type_discriminant
+    ///
+    /// Returns the discriminant of a TypeHierarchy if the Option is Some
+    /// and returns 0 if the Option is None.  
+    ///
+    fn top_type_discriminant(&self) -> u32 {
+        if self.top_type.is_none() {
+            0_u32
+        } else {
+            self.top_type().unwrap() as u32
+        }
+    }
+
+    /// top_type
+    ///
+    /// Returns the top type.
+    ///
     pub fn top_type(&self) -> Option<TypeHierarchy> {
         self.top_type.clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ConventionalCommits;
+
+    #[test]
+    fn top_discrimant_returns_0_for_none() {
+        let value_under_test = ConventionalCommits::new();
+        let expected = 0_u32;
+
+        assert_eq!(expected, value_under_test.top_type_discriminant());
+    }
+
+    #[test]
+    fn top_discrimant_returns_other() {
+        let mut value_under_test = ConventionalCommits::new();
+        value_under_test.top_type = Some(crate::TypeHierarchy::Other);
+        let expected = 1_u32;
+
+        assert_eq!(expected, value_under_test.top_type_discriminant());
+    }
+
+    #[test]
+    fn top_discrimant_returns_fix() {
+        let mut value_under_test = ConventionalCommits::new();
+        value_under_test.top_type = Some(crate::TypeHierarchy::Fix);
+        let expected = 2_u32;
+
+        assert_eq!(expected, value_under_test.top_type_discriminant());
+    }
+
+    #[test]
+    fn top_discrimant_returns_feature() {
+        let mut value_under_test = ConventionalCommits::new();
+        value_under_test.top_type = Some(crate::TypeHierarchy::Feature);
+        let expected = 3_u32;
+
+        assert_eq!(expected, value_under_test.top_type_discriminant());
+    }
+
+    #[test]
+    fn top_discrimant_returns_breaking() {
+        let mut value_under_test = ConventionalCommits::new();
+        value_under_test.top_type = Some(crate::TypeHierarchy::Breaking);
+        let expected = 4_u32;
+
+        assert_eq!(expected, value_under_test.top_type_discriminant());
     }
 }

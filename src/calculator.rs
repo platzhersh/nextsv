@@ -322,7 +322,7 @@ impl VersionCalculator {
             .as_ref()
             .unwrap()
             .top_type()
-            .unwrap_or_default()
+            .unwrap_or(TypeHierarchy::Other)
             >= level
         {
             let files = self.files.clone();

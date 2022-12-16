@@ -60,27 +60,6 @@ jobs:
           name: Test crate with no features specified
           command: "cargo test"
 
-  all-features-flag-test:
-    executor: rust-env
-    steps:
-      - checkout
-      - run: cargo --version
-      - run:
-          name: Test all features of the crate
-          command: "cargo test --all-features"
-
-  feature-test:
-    parameters:
-      feature:
-        type: string
-    executor: rust-env
-    steps:
-      - checkout
-      - run: cargo --version
-      - run:
-          name: Test <<parameters.feature>> features of the crate
-          command: "cargo test --features <<parameters.feature>>"
-
   docs:
     executor: rust-env
     environment:

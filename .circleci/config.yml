@@ -60,27 +60,6 @@ jobs:
           name: Test crate with no features specified
           command: "cargo test"
 
-  all-features-flag-test:
-    executor: rust-env
-    steps:
-      - checkout
-      - run: cargo --version
-      - run:
-          name: Test all features of the crate
-          command: "cargo test --all-features"
-
-  feature-test:
-    parameters:
-      feature:
-        type: string
-    executor: rust-env
-    steps:
-      - checkout
-      - run: cargo --version
-      - run:
-          name: Test <<parameters.feature>> features of the crate
-          command: "cargo test --features <<parameters.feature>>"
-
   docs:
     executor: rust-env
     environment:
@@ -123,7 +102,7 @@ jobs:
           name: Publish update
           command: |
             set -exo pipefail
-            cargo release -vv --registry spare --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
+            cargo release -vvv --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -159,3 +138,4 @@ workflows:
       - make-release:
           requires:
             - release-ready
+# VS Code Extension Version: 1.4.0

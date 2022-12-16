@@ -25,10 +25,9 @@ use crate::Error;
 ///
 /// If a breaking change is found it sets breaking hierarchy.
 ///
-#[derive(Default, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, ValueEnum)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, ValueEnum)]
 pub enum TypeHierarchy {
     /// enforce requirements for all types
-    #[default]
     Other = 1,
     /// enforce requirements for fix, feature and breaking
     Fix = 2,

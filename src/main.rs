@@ -102,13 +102,13 @@ fn main() {
         Ok(output) => match args.check {
             Some(minimum_level) => {
                 log::debug!("level expected is {:?}", &minimum_level);
-                log::debug!("level reported is {:?}", &output.2,);
+                log::debug!("level reported is {:?}", &output.2.clone().unwrap(),);
                 if let Some(type_level) = output.2 {
                     if type_level >= minimum_level {
-                        log::debug!("the minimum level is met");
+                        log::info!("the minimum level is met");
                         std::process::exit(EXIT_SUCCESS)
                     } else {
-                        log::debug!("the minimum level is not met");
+                        log::info!("the minimum level is not met");
                         std::process::exit(EXIT_NOT_REQUIRED_LEVEL)
                     };
                 }

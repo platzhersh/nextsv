@@ -118,7 +118,7 @@ impl Semantic {
     /// to identify tags with semantic version numbers
     /// the tag name can be parsed
     pub fn parse(tag: &str, version_prefix: &str) -> Result<Self, Error> {
-        // the stag string must start with the version_prefix
+        // the tag string must start with the version_prefix
         if !tag.starts_with(version_prefix) {
             return Err(Error::NotVersionTag(
                 version_prefix.to_string(),

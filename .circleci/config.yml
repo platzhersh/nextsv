@@ -123,7 +123,7 @@ jobs:
           name: Publish update
           command: |
             set -exo pipefail
-            cargo release -vv --registry spare --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
+            cargo release -vvv --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -159,3 +159,4 @@ workflows:
       - make-release:
           requires:
             - release-ready
+# VS Code Extension Version: 1.4.0

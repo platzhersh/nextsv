@@ -99,14 +99,7 @@ jobs:
       - run:
           name: Check if ready to make a release
           command: |
-            set -eo pipefail
-
-            if [ "$(nextsv -q)" != "none" ]
-            then
-              exit 0
-            else
-              exit 1
-            fi
+            nextsv -c fix
 
   make-release:
     executor: rust-env
@@ -129,7 +122,7 @@ jobs:
       - run:
           name: Publish update
           command: |
-            set -eo pipefail
+            set -exo pipefail
             cargo release -vv --registry spare --execute --no-confirm "$(nextsv -vvv -e feature -r 'CHANGES.md' -r 'CHANGELOG.md')"
 
 # Invoke jobs via workflows

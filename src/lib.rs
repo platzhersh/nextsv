@@ -41,7 +41,7 @@ mod conventional;
 mod error;
 mod semantic;
 
-pub use calculator::{ForceLevel, VersionCalculator};
+pub use calculator::{Answer, ForceLevel, VersionCalculator};
 pub(crate) use conventional::ConventionalCommits;
 pub use conventional::TypeHierarchy;
 pub use error::Error;

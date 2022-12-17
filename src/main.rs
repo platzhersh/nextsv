@@ -2,13 +2,13 @@ use std::ffi::OsString;
 use std::fmt;
 
 use clap::{Parser, ValueEnum};
-use nextsv::{Error, ForceLevel, Level, Semantic, TypeHierarchy, VersionCalculator};
+use nextsv::{Answer, Error, ForceLevel, TypeHierarchy, VersionCalculator};
 
 const EXIT_SUCCESS: i32 = 0;
 // const EXIT_UNEXPECTED_ERROR: i32 = 10;
 const EXIT_NOT_CREATED_CODE: i32 = 11;
-const EXIT_NOT_CALCULATED_CODE: i32 = 12;
-const EXIT_MISSING_REQUIRED_CODE: i32 = 13;
+// const EXIT_NOT_CALCULATED_CODE: i32 = 12;
+// const EXIT_MISSING_REQUIRED_CODE: i32 = 13;
 const EXIT_NOT_REQUIRED_LEVEL: i32 = 14;
 
 #[derive(ValueEnum, Debug, Clone)]
@@ -59,9 +59,12 @@ struct Cli {
     /// exits with an error if the threshold is not met.
     #[clap(short, long)]
     check: Option<TypeHierarchy>,
+    /// add outupt to environment variable
+    #[clap(long, default_value = "NEXTSV_LEVEL")]
+    set_env: Option<String>,
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     let args = Cli::parse();
 
     let mut builder = get_logging(args.logging.log_level_filter());
@@ -91,42 +94,40 @@ fn main() {
         Option::Some(args.require)
     };
 
-    match calculate(
+    let resp = calculate(
         latest_version,
         args.force,
         // args.level,
         // args.number,
         files,
         args.enforce_level,
-    ) {
-        Ok(output) => match args.check {
-            Some(minimum_level) => {
-                log::debug!("level expected is {:?}", &minimum_level);
-                log::debug!("level reported is {:?}", &output.2.clone().unwrap(),);
-                if let Some(type_level) = output.2 {
-                    if type_level >= minimum_level {
-                        log::info!("the minimum level is met");
-                        std::process::exit(EXIT_SUCCESS)
-                    } else {
-                        log::info!("the minimum level is not met");
-                        std::process::exit(EXIT_NOT_REQUIRED_LEVEL)
-                    };
-                }
-            }
-            None => {
-                log::debug!("not checking so print the output");
-                print_output(args.number, args.level, output.0, output.1)
-            }
-        },
-        Err(e) => {
-            log::error!("{}", &e.to_string());
-            if let Error::MissingRequiredFile(f) = e {
-                log::debug!("Required file {:?} not in the release candidate.", &f);
-                std::process::exit(EXIT_MISSING_REQUIRED_CODE);
-            }
-            std::process::exit(EXIT_NOT_CALCULATED_CODE)
-        }
-    };
+    )?;
+
+    set_environment_variable(args.set_env, resp.bump_level.to_string().into());
+    check_level(args.check, resp.change_level());
+    log::debug!("not checking so print the output");
+    print_output(args.number, args.level, resp);
+    Ok(())
+}
+
+fn check_level(threshold: Option<TypeHierarchy>, change_level: TypeHierarchy) {
+    if let Some(minimum_level) = threshold {
+        log::debug!("level expected is {:?}", &minimum_level);
+        log::debug!("level reported is {:?}", &change_level);
+        if change_level >= minimum_level {
+            log::info!("the minimum level is met");
+            std::process::exit(EXIT_SUCCESS)
+        } else {
+            log::info!("the minimum level is not met");
+            std::process::exit(EXIT_NOT_REQUIRED_LEVEL)
+        };
+    }
+}
+
+fn set_environment_variable(env_variable: Option<String>, value: OsString) {
+    if let Some(key) = env_variable {
+        std::env::set_var(key, value)
+    }
 }
 
 fn calculate(
@@ -136,7 +137,7 @@ fn calculate(
     // number: bool,
     files: Option<Vec<OsString>>,
     require_level: TypeHierarchy,
-) -> Result<(Level, Semantic, Option<TypeHierarchy>), Error> {
+) -> Result<Answer, Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
@@ -144,7 +145,7 @@ fn calculate(
     if let Some(f) = files {
         latest_version.has_required(f, require_level)?;
     }
-    let (next_version, bump) = if let Some(svc) = force {
+    let mut answer = if let Some(svc) = force {
         match svc {
             ForceOptions::Major => latest_version.force(ForceLevel::Major).next_version(),
             ForceOptions::Minor => latest_version.force(ForceLevel::Minor).next_version(),
@@ -155,9 +156,9 @@ fn calculate(
         latest_version.next_version()
     };
 
-    let top_level = latest_version.top_level();
+    answer.change_level = latest_version.top_level();
 
-    Ok((bump, next_version, top_level))
+    Ok(answer)
 }
 
 pub fn get_logging(level: log::LevelFilter) -> env_logger::Builder {
@@ -172,11 +173,11 @@ pub fn get_logging(level: log::LevelFilter) -> env_logger::Builder {
 
 /// Print the output from the calculation
 ///
-fn print_output(number: bool, level: bool, bump: Level, next_version: Semantic) {
+fn print_output(number: bool, level: bool, response: Answer) {
     match (number, level) {
-        (false, false) => println!("{bump}"),
-        (false, true) => println!("{bump}"),
-        (true, false) => println!("{next_version}"),
-        (true, true) => println!("{next_version}\n{bump}"),
+        (false, false) => println!("{}", response.bump_level),
+        (false, true) => println!("{}", response.bump_level),
+        (true, false) => println!("{}", response.version_number),
+        (true, true) => println!("{}\n{}", response.version_number, response.bump_level),
     }
 }

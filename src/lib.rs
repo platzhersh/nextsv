@@ -28,9 +28,9 @@
 //!
 //!     let latest_version = VersionCalculator::new(version_prefix)?;
 //!
-//!     let (next_version, next_level) = latest_version.walk_commits()?.next_version();
+//!     let answer = latest_version.walk_commits()?.next_version();
 //!
-//!     println!("Next Version: {}\nNext Level: {}", next_version, next_level);
+//!     println!("Next Version: {}\nNext Level: {}", answer.version_number, answer.bump_level);
 //!
 //! #    Ok(())
 //! # }

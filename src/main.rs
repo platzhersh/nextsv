@@ -3,13 +3,7 @@ use std::fmt;
 
 use clap::{Parser, ValueEnum};
 use nextsv::{Answer, Error, ForceLevel, TypeHierarchy, VersionCalculator};
-
-const EXIT_SUCCESS: i32 = 0;
-// const EXIT_UNEXPECTED_ERROR: i32 = 10;
-const EXIT_NOT_CREATED_CODE: i32 = 11;
-// const EXIT_NOT_CALCULATED_CODE: i32 = 12;
-// const EXIT_MISSING_REQUIRED_CODE: i32 = 13;
-const EXIT_NOT_REQUIRED_LEVEL: i32 = 14;
+use proc_exit::{Code, ExitResult};
 
 #[derive(ValueEnum, Debug, Clone)]
 enum ForceOptions {
@@ -64,7 +58,12 @@ struct Cli {
     set_env: Option<String>,
 }
 
-fn main() -> Result<(), Error> {
+fn main() {
+    let result = run();
+    proc_exit::exit(result);
+}
+
+fn run() -> ExitResult {
     let args = Cli::parse();
 
     let mut builder = get_logging(args.logging.log_level_filter());
@@ -77,13 +76,7 @@ fn main() -> Result<(), Error> {
         (true, true) => log::info!("Calculating the next version number and level"),
     };
 
-    let latest_version = match VersionCalculator::new(&args.prefix) {
-        Ok(v) => v,
-        Err(e) => {
-            log::error!("{}", e.to_string());
-            std::process::exit(EXIT_NOT_CREATED_CODE)
-        }
-    };
+    let latest_version = VersionCalculator::new(&args.prefix)?;
 
     log::trace!("require: {:#?}", args.require);
 
@@ -94,34 +87,29 @@ fn main() -> Result<(), Error> {
         Option::Some(args.require)
     };
 
-    let resp = calculate(
-        latest_version,
-        args.force,
-        // args.level,
-        // args.number,
-        files,
-        args.enforce_level,
-    )?;
+    let resp = calculate(latest_version, args.force, files, args.enforce_level)?;
 
     set_environment_variable(args.set_env, resp.bump_level.to_string().into());
-    check_level(args.check, resp.change_level());
+    check_level(args.check, resp.change_level())?;
     log::debug!("not checking so print the output");
     print_output(args.number, args.level, resp);
-    Ok(())
+
+    Code::SUCCESS.ok()
 }
 
-fn check_level(threshold: Option<TypeHierarchy>, change_level: TypeHierarchy) {
+fn check_level(threshold: Option<TypeHierarchy>, change_level: TypeHierarchy) -> Result<(), Error> {
     if let Some(minimum_level) = threshold {
         log::debug!("level expected is {:?}", &minimum_level);
         log::debug!("level reported is {:?}", &change_level);
         if change_level >= minimum_level {
             log::info!("the minimum level is met");
-            std::process::exit(EXIT_SUCCESS)
+            return Err(Error::MinimumChangeLevelMet);
         } else {
             log::info!("the minimum level is not met");
-            std::process::exit(EXIT_NOT_REQUIRED_LEVEL)
+            return Err(Error::MinimumChangeLevelNotMet);
         };
     }
+    Ok(())
 }
 
 fn set_environment_variable(env_variable: Option<String>, value: OsString) {
@@ -133,17 +121,15 @@ fn set_environment_variable(env_variable: Option<String>, value: OsString) {
 fn calculate(
     mut latest_version: VersionCalculator,
     force: Option<ForceOptions>,
-    // level: bool,
-    // number: bool,
     files: Option<Vec<OsString>>,
-    require_level: TypeHierarchy,
+    enforce_level: TypeHierarchy,
 ) -> Result<Answer, Error> {
     if let Some(f) = &force {
         log::debug!("Force option set to {}", f);
     };
     latest_version = latest_version.walk_commits()?;
     if let Some(f) = files {
-        latest_version.has_required(f, require_level)?;
+        latest_version.has_required(f, enforce_level)?;
     }
     let mut answer = if let Some(svc) = force {
         match svc {

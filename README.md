@@ -2,7 +2,7 @@
 
 [![Crates.io][crates-badge]][crates-url]
 [![MIT licensed][mit-badge]][mit-url]
-[![Build Status][circleci-batch]][circleci-url]
+[![Build Status][circleci-badge]][circleci-url]
 [![Rust 1.61+][version-badge]][version-url]
 [![FOSSA Status][fossa-badge]][fossa-url]
 [![Docs][docs-badge]][docs-url]
@@ -13,8 +13,8 @@
 [crates-url]: https://crates.io/crates/nextsv
 [mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [mit-url]: https://github.com/jerusdp/nextsv/blob/main/LICENSE
-[circleci-batch]:https://circleci.com/gh/jerusdp/nextsv/tree/main.svg?style=svg
-[circleci-url]: https://circleci.com/gh/jerusdp/nextsv/tree/main
+[circleci-badge]:https://circleci.com/gh/jerusdp/nextsv/tree/main.svg?style=svg
+[circleci-url]: https://circleci.com/gh/jerusdp/nextsv/tree/?branch=main
 [version-badge]: https://img.shields.io/badge/rust-1.61+-orange.svg
 [version-url]: https://www.rust-lang.org
 [fossa-badge]: https://app.fossa.com/api/projects/custom%2B22707%2Fgithub.com%2Fjerusdp%2Fnextsv.svg?type=shield

@@ -83,9 +83,6 @@ jobs:
   make-release:
     executor: rust-env
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "5a:b3:e5:e0:25:90:ba:58:3e:93:df:10:19:4c:68:e3"
       - checkout
       - run:
           name: import GPG key

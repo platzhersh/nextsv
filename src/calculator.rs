@@ -284,7 +284,7 @@ impl VersionCalculator {
         #[cfg(not(let_else))]
         let conventional = match self.conventional.clone() {
             Some(c) => c,
-            None => return (self.current_version.clone(), Level::None),
+            None => return Answer::new(Level::None, self.current_version.clone(), None),
         };
 
         let bump = if conventional.breaking() {

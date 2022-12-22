@@ -1,6 +1,6 @@
 [package]
 name = "nextsv"
-version = "0.7.8"
+version = "0.7.9"
 edition = "2021"
 authors = ["jerusdp <jrussell@jerus.ie>"]
 rust-version = "1.60"
@@ -12,7 +12,7 @@ keywords = ["semantic", "version", "calculator"]
 include = ["**/*.rs", "Cargo.toml", "README.md", "LICENSE", "CHANGES.md"]
 
 [dependencies]
-clap = { version = "4.0.29", features = ["derive"] }
+clap = { version = "4.0.30", features = ["derive"] }
 clap-verbosity-flag = "2.0.0"
 env_logger = "0.10.0"
 git-conventional = "0.12.0"

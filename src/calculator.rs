@@ -11,6 +11,44 @@ use crate::{ConventionalCommits, Error, Level, Semantic, TypeHierarchy};
 use git2::Repository;
 use std::{collections::HashSet, ffi::OsString, fmt};
 
+/// Struct the store the result of the calculation (the "answer" :) )
+///
+#[derive(Debug)]
+pub struct Answer {
+    /// the semantic level bump calcuated based on conventional commits
+    pub bump_level: Level,
+    /// the next version number calculated by applying the bump level to the
+    /// current version number
+    pub version_number: Semantic,
+    /// the change level calculated during the review of conventional commits
+    pub change_level: Option<TypeHierarchy>,
+}
+
+impl Answer {
+    /// Create a calculation
+    ///
+    pub fn new(
+        bump_level: Level,
+        version_number: Semantic,
+        change_level: Option<TypeHierarchy>,
+    ) -> Answer {
+        Answer {
+            bump_level,
+            version_number,
+            change_level,
+        }
+    }
+    /// Unwrap the change_level
+    ///
+    /// ## Error Handling
+    ///
+    /// If the option is None the lowest level TypeHierarchy will be returned
+    ///
+    pub fn change_level(&self) -> TypeHierarchy {
+        self.change_level.clone().unwrap_or(TypeHierarchy::Other)
+    }
+}
+
 /// The latest semantic version tag (vx.y.z)
 ///
 pub fn latest(version_prefix: &str) -> Result<Semantic, Error> {
@@ -237,16 +275,16 @@ impl VersionCalculator {
 
     /// Calculate the next version and report the version number
     /// and level at which the change is made.
-    pub fn next_version(&mut self) -> (Semantic, Level) {
+    pub fn next_version(&mut self) -> Answer {
         // check the conventional commits. No conventional commits; no change.
         #[cfg(let_else)]
         let Some(conventional) = self.conventional.clone() else {
-            return (self.current_version.clone(), Level::None)
+            return Answer::new(Level::None , self.current_version.clone(), None)
         };
         #[cfg(not(let_else))]
         let conventional = match self.conventional.clone() {
             Some(c) => c,
-            None => return (self.current_version.clone(), Level::None),
+            None => return Answer::new(Level::None, self.current_version.clone(), None),
         };
 
         let bump = if conventional.breaking() {
@@ -281,7 +319,7 @@ impl VersionCalculator {
         };
         let next_version = next_version_calculator(self.current_version.clone(), &final_bump);
 
-        (next_version, final_bump)
+        Answer::new(final_bump, next_version, None)
     }
 
     /// Report version 1.0.0 and update level major
@@ -289,7 +327,7 @@ impl VersionCalculator {
     /// ## Error
     ///
     /// Report error if major version number is greater than 0
-    pub fn promote_first(&mut self) -> Result<(Semantic, Level), Error> {
+    pub fn promote_first(&mut self) -> Result<Answer, Error> {
         if 0 < self.current_version.major() {
             Err(Error::MajorAlreadyUsed(
                 self.current_version.major().to_string(),

@@ -2,7 +2,14 @@
 
 use std::ffi::OsString;
 
+use proc_exit::{Code, Exit};
 use thiserror::Error;
+
+const EXIT_UNEXPECTED_ERROR: i32 = 10;
+const EXIT_NOT_CALCULATED_CODE: i32 = 12;
+const EXIT_MISSING_REQUIRED_CODE: i32 = 13;
+const EXIT_NOT_REQUIRED_LEVEL: i32 = 14;
+const EXIT_NO_FILES_LISTED: i32 = 15;
 
 /// The error type for nextsv.
 #[non_exhaustive]
@@ -39,7 +46,34 @@ pub enum Error {
     /// List of files has not been generated yet (or there are no commits). Call `commits` to generate the list by walking back to the current version tag.
     #[error("No files have been listed. May have been called before `commits`.")]
     NoFilesListed,
+    /// The minimum change level set for check has been met.
+    #[error("Minimum change Level has been met.")]
+    MinimumChangeLevelMet,
+    /// The minimum change level set for check has not been met.
+    #[error("Minimum change level has not been met.")]
+    MinimumChangeLevelNotMet,
     /// Error passed up from git2
     #[error("0:?")]
     Git2(#[from] git2::Error),
+}
+
+impl From<Error> for Exit {
+    fn from(err: Error) -> Self {
+        match err {
+            Error::Git2(_) => {
+                Exit::new(Code::new(EXIT_NOT_CALCULATED_CODE)).with_message(err.to_string())
+            }
+            Error::MissingRequiredFile(_) => {
+                Exit::new(Code::new(EXIT_MISSING_REQUIRED_CODE)).with_message(err.to_string())
+            }
+            Error::NoFilesListed => {
+                Exit::new(Code::new(EXIT_NO_FILES_LISTED)).with_message(err.to_string())
+            }
+            Error::MinimumChangeLevelMet => Exit::new(Code::SUCCESS).with_message(err.to_string()),
+            Error::MinimumChangeLevelNotMet => {
+                Exit::new(Code::new(EXIT_NOT_REQUIRED_LEVEL)).with_message(err.to_string())
+            }
+            _ => Exit::new(Code::new(EXIT_UNEXPECTED_ERROR)),
+        }
+    }
 }

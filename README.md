@@ -86,6 +86,7 @@ OPTIONS:
         --level              Report the level of the version number change
         --number             Report the version number
     -p, --prefix <PREFIX>    Prefix string to identify version number tags [default: v]
+    --pre-release <SUFFIX>   Suffix string to identify pre-release [example: alpha, beta, rc]
     -q, --quiet              Pass many times for less log output
     -v, --verbose            Pass many times for more log output
     -V, --version            Print version information

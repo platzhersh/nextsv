@@ -25,6 +25,8 @@ pub enum Level {
     Minor,
     /// Update will be made at the major level
     Major,
+    /// Update is to a generic pre-release suffix (for future use)
+    PreRelease,
     /// Update is a release removing any pre-release suffixes (for future use)
     Release,
     /// Update is to an alpha pre-release suffix (for future use)
@@ -49,6 +51,7 @@ impl fmt::Display for Level {
             Level::Minor => write!(f, "minor"),
             Level::Major => write!(f, "major"),
             Level::Release => write!(f, "release"),
+            Level::PreRelease => write!(f, "pre-release"),
             Level::Alpha => write!(f, "alpha"),
             Level::Beta => write!(f, "beta"),
             Level::Rc => write!(f, "rc"),
@@ -114,6 +117,14 @@ impl SemanticPreRelease {
 
         Ok(SemanticPreRelease::new(suffix, id))
     }
+
+    /// TODO
+    ///
+    pub fn increment(&mut self) -> &mut Self {
+        self.id += 1;
+        self
+    }
+
     ///
     ///
     pub fn suffix(&self) -> String {
@@ -144,8 +155,12 @@ impl fmt::Display for Semantic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{}{}.{}.{}{:?}",
-            self.version_prefix, self.major, self.minor, self.patch, self.pre_release
+            "{}{}.{}.{}{}",
+            self.version_prefix,
+            self.major,
+            self.minor,
+            self.patch,
+            self.pre_release.clone().unwrap().to_string()
         )
     }
 }
@@ -277,6 +292,19 @@ impl Semantic {
         self
     }
 
+    /// TODO
+    pub fn increment_pre_release(&mut self) -> &mut Self {
+        self.pre_release.as_mut().unwrap().increment();
+        self
+    }
+
+    /// TODO: usually goes along with a patch increment
+    ///
+    pub fn first_pre_release(&mut self, suffix: &str) -> &mut Self {
+        self.pre_release = Some(SemanticPreRelease::new(suffix.to_string(), 0));
+        self
+    }
+
     /// Set the first production release version
     ///
     pub fn first_production(&mut self) -> Result<&mut Self, Error> {
@@ -346,6 +374,24 @@ mod tests {
         let updated_version = version.increment_major();
 
         assert_eq!("1.0.0", &updated_version.to_string());
+    }
+
+    #[test]
+    fn set_pre_release_version_number() {
+        let mut version = Semantic::default();
+        let updated_version = version.first_pre_release("rc");
+
+        assert_eq!("0.0.0-rc.0", &updated_version.to_string());
+    }
+
+    #[test]
+    fn bump_pre_release_version_number_by_one() {
+        let mut version = Semantic::default();
+        version.first_pre_release("rc");
+
+        let updated_version = version.increment_pre_release();
+
+        assert_eq!("0.0.0-rc.1", &updated_version.to_string());
     }
 
     #[test]

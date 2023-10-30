@@ -20,6 +20,11 @@ Options:
           Prefix string to identify version number tags
           
           [default: v]
+          
+      --pre-release <SUFFIX>
+          Build a pre-release with a custom SUFFIX
+
+          [example values: alpha, beta, rc]
 
       --level
           Report the level of the version number change

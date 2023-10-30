@@ -40,6 +40,9 @@ struct Cli {
     /// Report the version number
     #[arg(long)]
     number: bool,
+    /// Set a pre-release string (optional)
+    #[arg(short, long, value_parser, default_value = None)]
+    pre_release: Option<String>,
     /// Require changes to these file before building release
     #[arg(short, long)]
     require: Vec<OsString>,

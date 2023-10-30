@@ -55,6 +55,9 @@ pub enum Error {
     /// Error passed up from git2
     #[error("0:?")]
     Git2(#[from] git2::Error),
+    /// Invalid Pre-Release Format
+    #[error("Invalid PreRelease suffix: {0}")]
+    InvalidPreRelease(String),
 }
 
 impl From<Error> for Exit {

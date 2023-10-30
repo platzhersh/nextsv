@@ -56,6 +56,77 @@ impl fmt::Display for Level {
     }
 }
 
+/// The semantic data structure for pre-releases
+///
+#[derive(Debug, Default, PartialEq, PartialOrd, Eq, Ord, Clone)]
+pub struct SemanticPreRelease {
+    suffix: String,
+    id: usize,
+}
+
+impl fmt::Display for SemanticPreRelease {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "-{}.{}", self.suffix, self.id)
+    }
+}
+
+impl SemanticPreRelease {
+    // Create a new struct specifying each of the semantic version components.
+    fn new(suffix: String, id: usize) -> Self {
+        SemanticPreRelease { suffix, id }
+    }
+
+    /// ```rust
+    /// # fn main() -> Result<(), nextsv::Error> {
+    /// use nextsv::SemanticPreRelease;
+    ///
+    /// let fragments = Vec::from(["v0", "2", "3-rc.0"]);
+    /// let semantic_version = SemanticPreRelease::parse(fragments)?;
+    ///
+    /// assert_eq!("rc", semantic_version.suffix());
+    /// assert_eq!(0, semantic_version.id());
+    ///
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn parse(fragments: Vec<usize>) -> Result<Self, Error> {
+        const PRE_RELEASE_PREFIX: &str = "-";
+
+        if fragments.len() < 3 {
+            return Err(Error::TooFewComponents(fragments.len()));
+        }
+        let patch_fragment = fragments[2].to_string();
+        let patch_fragments: Vec<&str> = patch_fragment.split(PRE_RELEASE_PREFIX).collect();
+
+        if patch_fragments.len() < 2 {
+            return Err(Error::InvalidPreRelease(patch_fragment.to_string()));
+        }
+
+        let pre_release_tag = patch_fragments[1];
+        let components: Vec<&str> = pre_release_tag.split('.').collect();
+
+        if components.len() < 2 {
+            return Err(Error::InvalidPreRelease(pre_release_tag.to_string()));
+        }
+
+        let suffix = components[0].to_string();
+        let id: usize = components[1].to_string().parse().unwrap();
+
+        Ok(SemanticPreRelease::new(suffix, id))
+    }
+    ///
+    ///
+    pub fn suffix(&self) -> String {
+        self.suffix.clone()
+    }
+
+    ///
+    ///
+    pub fn id(&self) -> usize {
+        self.id
+    }
+}
+
 /// The Semantic data structure represents a semantic version number.
 ///
 /// TODO: Implement support for pre-release and build
@@ -66,28 +137,37 @@ pub struct Semantic {
     major: usize,
     minor: usize,
     patch: usize,
+    pre_release: Option<SemanticPreRelease>,
 }
 
 impl fmt::Display for Semantic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{}{}.{}.{}",
-            self.version_prefix, self.major, self.minor, self.patch
+            "{}{}.{}.{}{:?}",
+            self.version_prefix, self.major, self.minor, self.patch, self.pre_release
         )
     }
 }
 
 impl Semantic {
     // Create a new struct specifying each of the semantic version components.
-    fn new(version_prefix: String, major: usize, minor: usize, patch: usize) -> Self {
+    fn new(
+        version_prefix: String,
+        major: usize,
+        minor: usize,
+        patch: usize,
+        pre_release: Option<SemanticPreRelease>,
+    ) -> Self {
         Semantic {
             version_prefix,
             major,
             minor,
             patch,
+            pre_release,
         }
     }
+
     /// Parse a tag and return a struct
     /// String format expect: <version_prefix>x.y.z
     ///
@@ -146,12 +226,14 @@ impl Semantic {
         if count_numbers < 3 {
             return Err(Error::TooFewComponents(count_numbers));
         }
+        // if () {}
 
         Ok(Semantic::new(
             version_prefix.to_string(),
             numbers[0],
             numbers[1],
             numbers[2],
+            SemanticPreRelease::parse(numbers).ok(),
         ))
     }
 
@@ -222,6 +304,12 @@ impl Semantic {
     ///
     pub fn patch(&self) -> usize {
         self.patch
+    }
+
+    /// Report the pre-release
+    ///
+    pub fn pre_release(&self) -> Option<SemanticPreRelease> {
+        self.pre_release.clone()
     }
 }
 

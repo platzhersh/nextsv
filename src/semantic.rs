@@ -97,7 +97,7 @@ impl SemanticPreRelease {
         let components: Vec<&str> = pre_release.split('.').collect();
 
         if components.len() < 2 {
-            return Err(Error::InvalidPreRelease(pre_release.to_string()));
+            return Err(Error::InvalidPreReleaseFormat(pre_release.to_string()));
         }
 
         let suffix = components[0].to_string();
@@ -246,7 +246,11 @@ impl Semantic {
 
         let mut pre_release = None;
         if semver_parts.len() > 1 {
-            pre_release = SemanticPreRelease::parse(semver_parts[1]).ok()
+            match SemanticPreRelease::parse(semver_parts[1]) {
+                Ok(t) => pre_release = Some(t),
+                Err(e) => return Err(e),
+            }
+            // pre_release = SemanticPreRelease::parse(semver_parts[1])
         }
 
         Ok(Semantic::new(
@@ -494,19 +498,19 @@ mod tests {
     }
 
     // TODO: ist mit Pre-Releases nicht mehr inkorrekt
-    //#[test]
-    // fn parse_error_version_must_be_a_number() {
-    //     let tag = "v0.3.90-8";
-    //     let version_prefix = "v";
-    //     let semantic = Semantic::parse(tag, version_prefix);
+    #[test]
+    fn parse_error_invalid_pre_release() {
+        let tag = "v0.3.90-8";
+        let version_prefix = "v";
+        let semantic = Semantic::parse(tag, version_prefix);
 
-    //     claims::assert_err!(&semantic);
-    //     let semantic = match semantic {
-    //         Ok(s) => s.to_string(),
-    //         Err(e) => e.to_string(),
-    //     };
-    //     assert_eq!("Version must be a number but found 90-8", semantic);
-    // }
+        claims::assert_err!(&semantic);
+        let semantic = match semantic {
+            Ok(s) => s.to_string(),
+            Err(e) => e.to_string(),
+        };
+        assert_eq!("Invalid PreRelease format: 8", semantic);
+    }
     // #[error("Version must be a number")]
     // MustBeNumber,
 }

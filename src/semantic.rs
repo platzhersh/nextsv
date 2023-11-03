@@ -31,7 +31,7 @@ pub enum Level {
     Release,
     /// Update is to an alpha pre-release suffix (for future use)
     Alpha,
-    /// Update is to an beta pre-release suffix (for future use)
+    /// Update is to a beta pre-release suffix (for future use)
     Beta,
     /// Update is to an rc pre-release suffix (for future use)
     Rc,

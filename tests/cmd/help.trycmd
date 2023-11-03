@@ -16,11 +16,6 @@ Options:
           
           [possible values: major, minor, patch, first]
 
-  --pre-release <PRE_RELEASE>
-          Build a pre-release with a custom suffix
-
-          [example values: alpha, beta, rc]
-
   -p, --prefix <PREFIX>
           Prefix string to identify version number tags
           
@@ -31,6 +26,9 @@ Options:
 
       --number
           Report the version number
+
+      --pre-release <PRE_RELEASE>
+          Set a pre-release string (optional) [example values: alpha, beta, rc]
 
   -r, --require <REQUIRE>
           Require changes to these file before building release
@@ -63,10 +61,10 @@ Options:
           [default: NEXTSV_LEVEL]
 
   -h, --help
-          Print help information (use `-h` for a summary)
+          Print help (see a summary with '-h')
 
   -V, --version
-          Print version information
+          Print version
 
 ```
 

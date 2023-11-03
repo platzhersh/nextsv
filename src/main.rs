@@ -181,11 +181,11 @@ fn calculate(
 fn has_existing_pre_release(version: Semantic) -> bool {
     match version.pre_release() {
         Some(_) => {
-            println!("Is a pre-release: {}", version);
+            log::info!("Is a pre-release: {}", version);
             true
         }
         None => {
-            println!("Is not a pre-release: {}", version);
+            log::info!("Is not a pre-release: {}", version);
             false
         }
     }

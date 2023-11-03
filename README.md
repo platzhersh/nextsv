@@ -82,7 +82,7 @@ USAGE:
 OPTIONS:
     -f, --force <FORCE>         Force the calculation of the version number [possible values: major,
                                 minor, patch, first]
-    -h, --help                  Print help information
+    -h, --help                  Print help information (use `-h` for a summary)
         --level                 Report the level of the version number change
         --number                Report the version number
     -p, --prefix <PREFIX>       Prefix string to identify version number tags [default: v]

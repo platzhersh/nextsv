@@ -16,8 +16,8 @@ Options:
           
           [possible values: major, minor, patch, first]
 
-  --pre-release <SUFFIX>
-          Build a pre-release with a custom SUFFIX
+  --pre-release <PRE_RELEASE>
+          Build a pre-release with a custom suffix
 
           [example values: alpha, beta, rc]
 

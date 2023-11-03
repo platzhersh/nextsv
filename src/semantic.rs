@@ -106,20 +106,20 @@ impl SemanticPreRelease {
         Ok(SemanticPreRelease::new(suffix, id))
     }
 
-    /// TODO
+    /// Increment pre-release version
     ///
     pub fn increment(&mut self) -> &mut Self {
         self.id += 1;
         self
     }
 
-    ///
+    /// get suffix
     ///
     pub fn suffix(&self) -> String {
         self.suffix.clone()
     }
 
-    ///
+    /// get id
     ///
     pub fn id(&self) -> usize {
         self.id
@@ -128,7 +128,6 @@ impl SemanticPreRelease {
 
 /// The Semantic data structure represents a semantic version number.
 ///
-/// TODO: Implement support for pre-release and build
 ///
 #[derive(Debug, Default, PartialEq, PartialOrd, Eq, Ord, Clone)]
 pub struct Semantic {
@@ -302,13 +301,14 @@ impl Semantic {
         self
     }
 
-    /// TODO
+    /// Increment the number of the pre-release
+    ///
     pub fn increment_pre_release(&mut self) -> &mut Self {
         self.pre_release.as_mut().unwrap().increment();
         self
     }
 
-    /// TODO: usually goes along with a patch increment
+    /// Create initial pre-release
     ///
     pub fn first_pre_release(&mut self, suffix: &str) -> &mut Self {
         self.pre_release = Some(SemanticPreRelease::new(suffix.to_string(), 0));
@@ -497,7 +497,6 @@ mod tests {
         );
     }
 
-    // TODO: ist mit Pre-Releases nicht mehr inkorrekt
     #[test]
     fn parse_error_invalid_pre_release() {
         let tag = "v0.3.90-8";

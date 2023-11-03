@@ -171,7 +171,6 @@ fn calculate(
         answer
     };
 
-    // TODO: what is change_level for?
     answer.change_level = latest_version.top_level();
 
     Ok(answer)

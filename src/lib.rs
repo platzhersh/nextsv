@@ -26,7 +26,7 @@
 //!     use nextsv::VersionCalculator;
 //!     let version_prefix = "v"; // Identifies a version tag
 //!
-//!     let latest_version = VersionCalculator::new(version_prefix)?;
+//!     let latest_version = VersionCalculator::new(version_prefix, None)?;
 //!
 //!     let answer = latest_version.walk_commits()?.next_version();
 //!

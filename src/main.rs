@@ -132,11 +132,6 @@ fn calculate(
         log::debug!("Force option set to {}", f);
     };
 
-    latest_version = latest_version.walk_commits()?;
-    if let Some(f) = files {
-        latest_version.has_required(f, enforce_level)?;
-    }
-
     let pre_release = latest_version.get_pre_release();
     let has_existing_pre_release: bool = has_existing_pre_release(latest_version.name());
     if has_existing_pre_release
@@ -147,6 +142,11 @@ fn calculate(
         let new_version = latest_version.name().increment_pre_release().clone();
         let answer = Answer::new(nextsv::Level::PreRelease, new_version, None);
         return Ok(answer);
+    }
+
+    latest_version = latest_version.walk_commits()?;
+    if let Some(f) = files {
+        latest_version.has_required(f, enforce_level)?;
     }
 
     let mut answer = if let Some(svc) = force {

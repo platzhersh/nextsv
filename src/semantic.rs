@@ -315,6 +315,13 @@ impl Semantic {
         self
     }
 
+    /// Unset pre-release, for promoting to actual release
+    ///
+    pub fn unset_pre_release(&mut self) -> &mut Self {
+        self.pre_release = None;
+        self
+    }
+
     /// Set the first production release version
     ///
     pub fn first_production(&mut self) -> Result<&mut Self, Error> {

@@ -157,6 +157,11 @@ fn calculate(
             ForceOptions::First => latest_version.promote_first()?,
         }
     } else {
+        if pre_release.is_none() && has_existing_pre_release {
+            // just promote pre-release
+            let new_version = latest_version.name().unset_pre_release().clone();
+            return Ok(Answer::new(nextsv::Level::Release, new_version, None));
+        }
         let mut answer = latest_version.next_version();
         let mut next_version = answer.version_number.clone();
         if pre_release.is_some() {
